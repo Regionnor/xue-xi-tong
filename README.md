@@ -1,6 +1,6 @@
 # 学习通AI答题小助手（Region改良款）
 
-> 由 [ScriptCat #711《🥇超星学习通｜知到智慧树——网课小助手》](https://scriptcat.org/zh-CN/script-show-page/711)（原版 v0.2.7）改良而来，在此向原作者致敬。
+> 由 [ScriptCat #711《🥇超星学习通｜知到智慧树——网课小助手》](https://scriptcat.org/zh-CN/script-show-page/711)改良而来，在此向原作者致敬。
 
 本脚本是一款运行在**超星学习通**网页上的用户脚本（Userscript），最大特色是**接入任意 OpenAI 兼容 AI 接口**来完成答题，不再依赖任何第三方题库。
 
@@ -58,20 +58,6 @@
 - `*.nbdlib.cn`
 - `*.hnsyu.net`
 - `*.gdhkmooc.com`
-
----
-
-## 🔧 与原版 #711 的主要区别
-
-| 项目 | 原版 #711 | 本改良款 |
-| --- | --- | --- |
-| 答题来源 | 第三方题库 | **自有 AI 接口** |
-| 题库密钥 | 需要 | **已移除** |
-| 知到智慧树 | 支持 | **已移除，仅超星学习通** |
-| 远程公告 | 有 | **已移除** |
-| `@author` | —— | Region |
-| `@namespace` | —— | https://github.com/Region |
-| `@version` | 0.2.7 | 0.1 |
 
 ---
 
