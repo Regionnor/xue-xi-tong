@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.7
+// @version      1.8
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6681,8 +6681,9 @@
       const url2 = window.location.href;
       const cardWidth = vue.computed(() => configStore.menuIndex === ANSWER_TAB_NAME ? ANSWER_CARD_WIDTH : DEFAULT_CARD_WIDTH);
       (_a = document.querySelector("li>a.experience:not([onclick])")) == null ? void 0 : _a.click();
+      const scriptVersion = (_GM_info && _GM_info.script && _GM_info.script.version) || "未知";
       logStore.addLog("用户悉知：使用脚本即为完全同意用户协议", "success");
-      logStore.addLog("脚本加载成功，正在解析网页", "primary");
+      logStore.addLog(`脚本加载成功，正在解析网页（当前版本 v${scriptVersion}）`, "primary");
       logStore.addLog("请不要多个脚本同时使用，会有脚本冲突问题", "warning");
       logStore.addLog("如果脚本出现异常，请用谷歌、火狐等浏览器", "warning");
       const urlLogicPairs = [
