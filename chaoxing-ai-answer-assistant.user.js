@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.6
+// @version      1.7
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6234,6 +6234,21 @@
           }
           return null;
         };
+        const collectIframesDeep = (root, out = []) => {
+          try {
+            const ifr = root && root.querySelectorAll ? root.querySelectorAll("iframe") : [];
+            for (let i2 = 0; i2 < ifr.length; i2++) {
+              out.push(ifr[i2]);
+              try {
+                if (ifr[i2].contentDocument)
+                  collectIframesDeep(ifr[i2].contentDocument, out);
+              } catch (e2) {
+              }
+            }
+          } catch (e2) {
+          }
+          return out;
+        };
         let mediaFindAttempts = 0;
         const intervalId2 = setInterval(async () => {
           if (settled)
@@ -6245,8 +6260,23 @@
             if (!mediaElement) {
               mediaFindAttempts++;
               if (mediaFindAttempts === 1)
-                logStore.addLog(`[诊断] 未在 iframe 直接层找到 <${mediaType}>，正在嵌套 iframe 中继续查找（最多约 30s）`, "primary");
-              if (mediaFindAttempts >= 12) {
+                logStore.addLog(`[诊断] 未在本 iframe 直接层找到 <${mediaType}>，继续在嵌套 iframe 中查找`, "primary");
+              if (mediaFindAttempts === 2) {
+                try {
+                  const all = collectIframesDeep(document.documentElement);
+                  for (let i2 = 0; i2 < all.length; i2++) {
+                    const m = findMediaDeep(all[i2].contentDocument, mediaType);
+                    if (m && (m.currentSrc || m.src)) {
+                      mediaElement = m;
+                      break;
+                    }
+                  }
+                  if (mediaElement)
+                    logStore.addLog(`[诊断] 已在本 iframe 之外定位到 <${mediaType}> 播放器，继续处理`, "primary");
+                } catch (e2) {
+                }
+              }
+              if (!mediaElement && mediaFindAttempts >= 5) {
                 logStore.addLog(`[诊断] 仍未找到 <${mediaType}> 元素，结束本任务点以避免卡住后续章节切换`, "warning");
                 return finish();
               }
