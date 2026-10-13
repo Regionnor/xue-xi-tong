@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.4
+// @version      1.5
+// @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
 // @description  🤖 学习通AI答题小助手（Region改良款）：由 ScriptCat 脚本 #711（超星学习通｜知到智慧树 网课小助手）改良而来。移除原版第三方题库与知到智慧树平台，仅专注超星学习通。核心特性：兼容任意 OpenAI 兼容 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等），答题时调用你自己的 AI 自动作答；保留视频播放、章节测试、作业与考试自动完成等能力。使用前请在「答题」设置中填写 AI 接口地址与 API Key。
 // @license      MIT

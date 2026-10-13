@@ -8,6 +8,15 @@
 
 ---
 
+## [1.5] - 2026-10-13
+
+### ✨ 新增 (Added) - 2026-10-13
+- **脚本自动检查更新能力**：在脚本头部新增 `@downloadURL` / `@updateURL`（均指向 jsDelivr 的 `@main` 分支稳定链接 `https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js`）。
+  - 启用后，Tampermonkey / ScriptCat 会在打开超星页面时自动比对版本号，有新版本则提示更新，无需手动重新安装。
+  - ⚠️ 自动更新依赖本仓库 `main` 分支保持最新：每次改完脚本请 `git push origin main`，jsDelivr 才会同步到最新内容（jsDelivr 对 GitHub 文件默认有约 12 小时 CDN 缓存，紧急更新可手动在 jsDelivr 链接后加 `?_=时间戳` 或前往 jsDelivr 后台 Purge 刷新）。
+
+---
+
 ## [1.4] - 2026-10-13
 
 ### 🛠 修复 (Fixed) - 2026-10-13
