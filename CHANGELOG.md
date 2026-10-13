@@ -8,6 +8,14 @@
 
 ---
 
+## [1.3] - 2026-10-13
+
+### 🔧 优化 (Changed) - 2026-10-13
+- 抑制对**明显非任务 iframe**（章节容器页 `knowledge/cards` / `mycourse/studentstudy`、空 src、`about:blank`、`javascript:`）的「未识别到可处理任务点」告警，避免误导用户以为功能异常；仅在真正无法判定、且非上述已知容器的 iframe 上才保留诊断日志。
+
+### ✅ 验证 (Verified)
+- 用户实测日志确认 v1.2 的识别升级已生效：章节内 `ananas/modules/pdf/index.html` 文档被识别为阅读器，触发 `processPpt`（「发现一个文档，正在解析」→「阅读完成」），视频任务也正常播放。
+
 ## [1.2] - 2026-10-13
 
 ### 🛠 修复 (Fixed) - 2026-10-13
