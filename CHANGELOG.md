@@ -8,7 +8,7 @@
 
 ---
 
-## [0.1] - 2026-09-28
+## [1.0] - 2026-10-13
 
 首个改良版本，基于 ScriptCat #711（v0.2.7）重构答题逻辑。
 
@@ -24,8 +24,16 @@
 - 头部过期题库域名 `@connect`（tikuhai / icodef / 62.234.36.191），仅保留 `@connect *` 以支持任意 AI 域名。
 
 ### 🔧 变更 (Changed)
-- 元信息：`@name` → 学习通AI答题小助手--Region改良款；`@author` → Region；`@namespace` → `https://github.com/Region`；`@version` → `0.1`。
+- 元信息：`@name` → 学习通AI答题小助手--Region改良款；`@author` → Region；`@namespace` → `https://github.com/Region`；`@version` → `1.0`。
 - `@description` 重写，强调 AI 接口兼容性与改良来源。
+
+### 🛠 修复 (Fixed) - 2026-10-13
+- 修复章节任务点处理时读取 `contentWindow` 报 `TypeError: Cannot read properties of null` 导致整批任务「任务处理失败」的问题：
+  - `IframeUtils.getIframes` / `getAllNestedIframes`：元素、iframe、`documentElement` 空值判空，`contentDocument` 读取加 try/catch。
+  - `processIframe`：iframe 为空或已从文档分离时直接跳过，`src` 读取容错。
+  - `processPpt` / `processBook`：`iframeWindow` 与页面函数（`onchangepage` / `getFrameAttr`）判空并 try/catch。
+  - `processMedia`：入参判空，`documentElement` 查询容错。
+- 单个 iframe 任务点处理异常不再中断整批任务：改为记录警告日志后继续处理下一个任务点。
 
 ### 🌐 兼容性 (Compatibility)
 - `@match` 覆盖超星学习通相关域名：`*.chaoxing.com`、`*.edu.cn`、`*.nbdlib.cn`、`*.hnsyu.net`、`*.gdhkmooc.com`。

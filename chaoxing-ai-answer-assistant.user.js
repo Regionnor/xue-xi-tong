@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      0.1
+// @version      1.0
 // @author       Region
 // @description  🤖 学习通AI答题小助手（Region改良款）：由 ScriptCat 脚本 #711（超星学习通｜知到智慧树 网课小助手）改良而来。移除原版第三方题库与知到智慧树平台，仅专注超星学习通。核心特性：兼容任意 OpenAI 兼容 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等），答题时调用你自己的 AI 自动作答；保留视频播放、章节测试、作业与考试自动完成等能力。使用前请在「答题」设置中填写 AI 接口地址与 API Key。
 // @license      MIT
@@ -2421,7 +2421,9 @@
   }
   class IframeUtils {
     static getIframes(element) {
-      return Array.from(element.querySelectorAll("iframe"));
+      if (!element || typeof element.querySelectorAll !== "function")
+        return [];
+      return Array.from(element.querySelectorAll("iframe")).filter((iframe) => !!iframe);
     }
     static getAllNestedIframes(element) {
       const iframes = IframeUtils.getIframes(element);
@@ -2431,9 +2433,15 @@
         return rxjs.from(iframes).pipe(
           mergeMap(
             (iframe) => new rxjs.Observable((subscriber) => {
-              if (iframe.contentDocument) {
-                const iframeDocument = iframe.contentDocument;
-                const nestedIframes = IframeUtils.getAllNestedIframes(iframeDocument.documentElement);
+              let iframeDocument = null;
+              try {
+                iframeDocument = iframe.contentDocument;
+              } catch (error) {
+                iframeDocument = null;
+              }
+              const nestedRoot = iframeDocument ? iframeDocument.documentElement : null;
+              if (nestedRoot) {
+                const nestedIframes = IframeUtils.getAllNestedIframes(nestedRoot);
                 nestedIframes.subscribe((nestedIframes2) => {
                   subscriber.next([iframe, ...nestedIframes2]);
                   subscriber.complete();
@@ -6066,10 +6074,15 @@
     const watchIframe = (documentElement, context) => {
       const thisTaskId = ++currentWatchIframeTaskId;
       IframeUtils.getAllNestedIframes(documentElement).subscribe((allIframes) => {
-        rxjs.from(allIframes).pipe(concatMap((iframe) => {
+        rxjs.from(allIframes).pipe(concatMap(async (iframe) => {
           if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
-            return Promise.resolve();
-          return processIframe(iframe, context);
+            return;
+          try {
+            await processIframe(iframe, context);
+          } catch (error) {
+            if (context.isCurrent())
+              logStore.addLog(`任务点处理跳过（已忽略异常，不影响后续）：${String(error)}`, "warning");
+          }
         })).subscribe({
           complete: async () => {
             var _a;
@@ -6099,6 +6112,8 @@
       });
     };
     const processMedia = async (mediaType, iframe, iframeDocument, context) => {
+      if (!iframe || !iframeDocument)
+        return Promise.resolve();
       return new Promise((resolve, reject) => {
         logStore.addLog(`发现一个${mediaType}，正在解析`, "warning");
         logStore.addLog(`正在尝试播放${mediaType}，请稍等5s`, "primary");
@@ -6163,7 +6178,7 @@
           if (!context.isCurrent())
             return finish();
           if (!isExecuted)
-            mediaElement = iframeDocument.documentElement.querySelector(mediaType);
+            mediaElement = iframeDocument.documentElement ? iframeDocument.documentElement.querySelector(mediaType) : null;
           if (isFinishedTask(iframe)) {
             logStore.addLog(`${mediaType}任务点已完成，跳过`, "success");
             return finish();
@@ -6269,8 +6284,17 @@
         logStore.addLog("作业已完成", "success");
     };
     const processPpt = async (iframeWindow, context) => {
+      if (!iframeWindow)
+        return Promise.resolve();
       logStore.addLog("发现一个文档，正在解析", "warning");
-      const document2 = iframeWindow.document;
+      let document2 = null;
+      try {
+        document2 = iframeWindow.document;
+      } catch (error) {
+        document2 = null;
+      }
+      if (!document2)
+        return Promise.resolve();
       const viewerFrame = document2.querySelector("#panView");
       const scrollViewer = () => {
         var _a, _b, _c;
@@ -6295,8 +6319,17 @@
       logStore.addLog("阅读完成", "success");
     };
     const processBook = async (iframeWindow) => {
+      if (!iframeWindow)
+        return Promise.resolve();
       logStore.addLog("发现一个电子书，正在解析", "warning");
-      _unsafeWindow.top.onchangepage(iframeWindow.getFrameAttr("end"));
+      try {
+        const frameAttr = typeof iframeWindow.getFrameAttr === "function" ? iframeWindow.getFrameAttr("end") : void 0;
+        const topWindow = _unsafeWindow.top || _unsafeWindow;
+        if (typeof topWindow.onchangepage === "function")
+          topWindow.onchangepage(frameAttr);
+      } catch (error) {
+        logStore.addLog(`电子书翻页跳过：${String(error)}`, "warning");
+      }
       logStore.addLog("阅读完成", "success");
       return Promise.resolve();
     };
@@ -6342,7 +6375,7 @@
       if (isFinishedTask(iframe)) {
         configStore.menuIndex = iframeSrc.includes("api/work") ? ANSWER_TAB_NAME2 : HOME_TAB_NAME;
         if (iframeSrc.includes("video") || iframeSrc.includes("audio")) {
-          (_a = iframeDocument.documentElement.querySelector("video, audio")) == null ? void 0 : _a.pause();
+          (_a = iframeDocument.documentElement ? iframeDocument.documentElement.querySelector("video, audio") : null) == null ? void 0 : _a.pause();
         }
         logStore.addLog("发现一个已完成任务点", "success");
       } else {
@@ -6370,7 +6403,9 @@
       return Promise.resolve();
     };
     const processIframe = async (iframe, context) => {
-      if (iframe.src.includes("javascript:"))
+      if (!iframe || !iframe.isConnected)
+        return Promise.resolve();
+      if ((iframe.src || "").includes("javascript:"))
         return Promise.resolve();
       if (!iframe.contentDocument || !iframe.contentWindow)
         return Promise.resolve();
