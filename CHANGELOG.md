@@ -8,6 +8,14 @@
 
 ---
 
+## [1.4] - 2026-10-13
+
+### 🛠 修复 (Fixed) - 2026-10-13
+- **真正修复文档/PPT 自动下滑但页面不移动的问题**：此前 `processPpt` 只 `scrollTo(window)`，而超星 PDF 阅读器内容实际渲染在嵌套的 `mooc-ans/screen/file` iframe（或 #panView）中，window 无溢出故滚动无效。
+  - `processPpt` 的滚动改为 `scrollDeep`：**滚动 window / scrollingElement / body + 文档内所有可滚动容器 + 递归进入全部嵌套 iframe**（深度上限 8），确保滑到真正的内容渲染层。
+  - 文档识别新增 `screen/file` 来源，避免漏判该渲染层 iframe。
+  - 新增诊断日志：`[诊断] 文档滚动：本次尝试滚动 N 个可滚动容器`，便于确认是否真的滚到了内容。
+
 ## [1.3] - 2026-10-13
 
 ### 🔧 优化 (Changed) - 2026-10-13

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.3
+// @version      1.4
 // @author       Region
 // @description  🤖 学习通AI答题小助手（Region改良款）：由 ScriptCat 脚本 #711（超星学习通｜知到智慧树 网课小助手）改良而来。移除原版第三方题库与知到智慧树平台，仅专注超星学习通。核心特性：兼容任意 OpenAI 兼容 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等），答题时调用你自己的 AI 自动作答；保留视频播放、章节测试、作业与考试自动完成等能力。使用前请在「答题」设置中填写 AI 接口地址与 API Key。
 // @license      MIT
@@ -6307,18 +6307,47 @@
       if (!document2)
         return Promise.resolve();
       const viewerFrame = document2.querySelector("#panView");
-      const scrollViewer = () => {
-        var _a, _b, _c;
-        const viewerDocument = (viewerFrame == null ? void 0 : viewerFrame.contentDocument) || document2;
-        const viewerWindow = (viewerFrame == null ? void 0 : viewerFrame.contentDocument) ? viewerFrame.contentWindow : iframeWindow;
-        const top = Math.max(
-          ((_a = viewerDocument.body) == null ? void 0 : _a.scrollHeight) || 0,
-          ((_b = viewerDocument.documentElement) == null ? void 0 : _b.scrollHeight) || 0,
-          ((_c = viewerDocument.scrollingElement) == null ? void 0 : _c.scrollHeight) || 0
-        );
-        viewerWindow == null ? void 0 : viewerWindow.scrollTo({ top, behavior: "smooth" });
+      const scrollDeep = (win, depth = 0) => {
+        if (!win || depth > 8)
+          return 0;
+        let moved = 0;
+        try {
+          const d = win.document;
+          if (typeof win.scrollTo === "function")
+            win.scrollTo({ top: 1e9, behavior: "smooth" });
+          if (d && d.scrollingElement)
+            d.scrollingElement.scrollTop = 1e9;
+          if (d && d.documentElement)
+            d.documentElement.scrollTop = 1e9;
+          if (d && d.body)
+            d.body.scrollTop = 1e9;
+          const scrollEls = (d && typeof d.querySelectorAll === "function") ? d.querySelectorAll("*") : [];
+          for (let i = 0; i < scrollEls.length; i++) {
+            const el = scrollEls[i];
+            if (el.scrollHeight > el.clientHeight + 5) {
+              try {
+                el.scrollTop = el.scrollHeight;
+                moved++;
+              } catch (e) {
+              }
+            }
+          }
+          // 递归进入所有嵌套 iframe（含 #panView / screen/file 等真正的内容渲染层）
+          const innerFrames = (d && typeof d.querySelectorAll === "function") ? d.querySelectorAll("iframe") : [];
+          for (let j = 0; j < innerFrames.length; j++) {
+            try {
+              if (innerFrames[j].contentWindow)
+                moved += scrollDeep(innerFrames[j].contentWindow, depth + 1);
+            } catch (e) {
+            }
+          }
+        } catch (error) {
+        }
+        return moved;
       };
-      scrollViewer();
+      const rootWin = (viewerFrame && viewerFrame.contentWindow) ? viewerFrame.contentWindow : iframeWindow;
+      const movedCount = scrollDeep(rootWin);
+      logStore.addLog(`[诊断] 文档滚动：本次尝试滚动 ${movedCount} 个可滚动容器（含 #panView 嵌套）`, "primary");
       const configuredInterval = Number(configStore.otherParams.params[0].value);
       await sleep(Math.max(
         PDF_COMPLETION_WAIT_SECONDS,
@@ -6326,7 +6355,7 @@
       ));
       if (!context.isCurrent())
         return;
-      scrollViewer();
+      scrollDeep(rootWin);
       logStore.addLog("阅读完成", "success");
     };
     const processBook = async (iframeWindow) => {
@@ -6401,7 +6430,7 @@
         configStore.menuIndex = HOME_TAB_NAME;
         const lowerSrc = (iframeSrc || "").toLowerCase();
         const docTypes = ["ppt", "pptx", "doc", "docx", "pdf"];
-        const isPptDoc = docTypes.some((type) => lowerSrc.includes("modules/" + type) || lowerSrc.includes("/" + type + "/index.html"));
+        const isPptDoc = docTypes.some((type) => lowerSrc.includes("modules/" + type) || lowerSrc.includes("/" + type + "/index.html")) || lowerSrc.includes("screen/file");
         const isInnerBook = lowerSrc.includes("innerbook") || lowerSrc.includes("modules/book");
         let contentIsDocViewer = false;
         try {
