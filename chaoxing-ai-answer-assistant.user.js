@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.5
+// @version      1.6
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6102,14 +6102,39 @@
             if (thisTaskId === currentWatchIframeTaskId && context.isCurrent()) {
               logStore.addLog(`本页任务点已全部完成，正前往下一章节`, "success");
               if (configStore.platformParams.cx.parts[0].params[1].value) {
-                const nextBtn = documentElement.querySelector("#prevNextFocusNext");
-                if (!nextBtn || nextBtn.style.display === "none") {
-                  logStore.addLog(`已经到达最后一章节，无法跳转`, "danger");
+                await sleep(configStore.otherParams.params[0].value);
+                if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
+                  return;
+                let nextClicked = false;
+                const tryClick = (sel) => {
+                  try {
+                    const b = document.querySelector(sel);
+                    if (b && b.style.display !== "none") {
+                      b.click();
+                      return true;
+                    }
+                  } catch (e2) {
+                  }
+                  return false;
+                };
+                const selectors = ["#prevNextFocusNext", ".jb_btn.jb_btn_92.fr.fs14.nextChapter", ".nextChapter", ".nextChapterBtn", "#nextChapter"];
+                for (let s = 0; s < selectors.length; s++) {
+                  if (tryClick(selectors[s])) {
+                    nextClicked = true;
+                    break;
+                  }
+                }
+                if (nextClicked) {
+                  setTimeout(() => {
+                    try {
+                      const confirmBtn = document.querySelector(".maskDiv.jobFinishTip .nextChapter, .jobFinishTip .nextChapter, .jobFinishTip .el-button, .jobFinishTip button");
+                      if (confirmBtn && confirmBtn.style.display !== "none")
+                        confirmBtn.click();
+                    } catch (e2) {
+                    }
+                  }, 800);
                 } else {
-                  await sleep(configStore.otherParams.params[0].value);
-                  if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
-                    return;
-                  (_a = document.querySelector(".jb_btn.jb_btn_92.fr.fs14.nextChapter")) == null ? void 0 : _a.click();
+                  logStore.addLog(`未找到可用的「下一节」按钮（已尝试多种选择器），可能已到最后一节或页面结构已变`, "danger");
                 }
               } else {
                 logStore.addLog(`已经关闭自动下一章节，在设置里可更改`, "danger");
@@ -6185,13 +6210,48 @@
             logStore.addLog(`${mediaType}已播放完成`, "success");
           finish();
         };
+        const findMediaDeep = (doc, type, depth = 0) => {
+          if (!doc || depth > 4)
+            return null;
+          let el = null;
+          try {
+            el = doc.querySelector ? doc.querySelector(type) : null;
+          } catch (e2) {
+          }
+          if (el)
+            return el;
+          try {
+            const frames = doc.querySelectorAll ? doc.querySelectorAll("iframe") : [];
+            for (let i2 = 0; i2 < frames.length; i2++) {
+              try {
+                const found = findMediaDeep(frames[i2].contentDocument, type, depth + 1);
+                if (found)
+                  return found;
+              } catch (e2) {
+              }
+            }
+          } catch (e2) {
+          }
+          return null;
+        };
+        let mediaFindAttempts = 0;
         const intervalId2 = setInterval(async () => {
           if (settled)
             return;
           if (!context.isCurrent())
             return finish();
-          if (!isExecuted)
-            mediaElement = iframeDocument.documentElement ? iframeDocument.documentElement.querySelector(mediaType) : null;
+          if (!isExecuted) {
+            mediaElement = findMediaDeep(iframeDocument, mediaType);
+            if (!mediaElement) {
+              mediaFindAttempts++;
+              if (mediaFindAttempts === 1)
+                logStore.addLog(`[诊断] 未在 iframe 直接层找到 <${mediaType}>，正在嵌套 iframe 中继续查找（最多约 30s）`, "primary");
+              if (mediaFindAttempts >= 12) {
+                logStore.addLog(`[诊断] 仍未找到 <${mediaType}> 元素，结束本任务点以避免卡住后续章节切换`, "warning");
+                return finish();
+              }
+            }
+          }
           if (isFinishedTask(iframe)) {
             logStore.addLog(`${mediaType}任务点已完成，跳过`, "success");
             return finish();
@@ -6199,6 +6259,8 @@
           if (mediaElement && !isExecuted) {
             isExecuted = true;
             try {
+              const mediaSrc = mediaElement.currentSrc || mediaElement.src || "(无 src)";
+              logStore.addLog(`[诊断] 已找到 <${mediaType}>（src=${String(mediaSrc).slice(0, 90)}），准备播放`, "primary");
               mediaElement.pause();
               mediaElement.muted = true;
               if (mediaType === "video") {
@@ -6231,16 +6293,35 @@
                   log: (message, type) => logStore.addLog(message, type)
                 });
               }
-              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz()))
-                await mediaElement.play();
+              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
+                try {
+                  await mediaElement.play();
+                } catch (playError) {
+                  logStore.addLog(`[诊断] play() 被拒绝（${String((playError == null ? void 0 : playError.name) || playError)}），改尝试点击播放按钮`, "warning");
+                }
+                if (mediaElement.paused) {
+                  try {
+                    const ownerDoc = mediaElement.ownerDocument || iframeDocument;
+                    const btn = ownerDoc.querySelector(".vjs-big-play-button, .prism-big-play-btn, .playButton, .vjs-play-control, .prism-play-btn");
+                    if (btn)
+                      btn.click();
+                  } catch (e2) {
+                  }
+                }
+              }
               if (settled)
                 return;
               if (!context.isCurrent())
                 return finish();
               if (isFinishedTask(iframe))
                 return finish();
-              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz()))
-                logStore.addLog("播放成功", "success");
+              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
+                if (mediaElement.paused) {
+                  logStore.addLog(`[诊断] 视频仍未开始播放（可能被浏览器自动播放策略拦截），请先在页面或视频上点一下以授权后刷新重试`, "warning");
+                } else {
+                  logStore.addLog("播放成功", "success");
+                }
+              }
               mediaElement.addEventListener("pause", resume);
               mediaElement.addEventListener("ended", ended);
               if (mediaElement.ended)
