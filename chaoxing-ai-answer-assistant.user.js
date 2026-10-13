@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.1
+// @version      1.2
 // @author       Region
 // @description  🤖 学习通AI答题小助手（Region改良款）：由 ScriptCat 脚本 #711（超星学习通｜知到智慧树 网课小助手）改良而来。移除原版第三方题库与知到智慧树平台，仅专注超星学习通。核心特性：兼容任意 OpenAI 兼容 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等），答题时调用你自己的 AI 自动作答；保留视频播放、章节测试、作业与考试自动完成等能力。使用前请在「答题」设置中填写 AI 接口地址与 API Key。
 // @license      MIT
@@ -6019,6 +6019,7 @@
     let currentPage;
     let chapterController = new AbortController();
     let currentWatchIframeTaskId = 0;
+    let lastIframeDiagSig = "";
     let disposed = false;
     const isFinishedTask = (iframe) => {
       var _a;
@@ -6074,6 +6075,16 @@
     const watchIframe = (documentElement, context) => {
       const thisTaskId = ++currentWatchIframeTaskId;
       IframeUtils.getAllNestedIframes(documentElement).subscribe((allIframes) => {
+        try {
+          const srcList = allIframes.map((f) => (f && f.src) || "(空)");
+          const sig = srcList.join("|");
+          if (sig !== lastIframeDiagSig) {
+            lastIframeDiagSig = sig;
+            const shown = srcList.map((s) => s.length > 110 ? s.slice(0, 110) + "…" : s);
+            logStore.addLog(`[诊断] 本页枚举到 ${allIframes.length} 个 iframe：${shown.join(" ｜ ") || "(无)"}`, "primary");
+          }
+        } catch (error) {
+        }
         rxjs.from(allIframes).pipe(concatMap(async (iframe) => {
           if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
             return;
@@ -6386,24 +6397,39 @@
           logStore.addLog("只答题，不做其他已开启，已跳过 PPT/文档/音视频的自动阅读（如需自动滑动阅读，请在设置中关闭该项）", "primary");
           return Promise.resolve();
         }
-        // 路由：优先按 iframe 来源类型判断任务点类型，避免超星改版后 .ans-job-icon 位置/类名变化导致漏处理、不滑动
+        // 路由：来源类型 → 内容特征 → .ans-job-icon 三重兜底，避免因超星改版（来源路径/图标位置变化）漏处理、不滑动
         configStore.menuIndex = HOME_TAB_NAME;
-        if (iframeSrc.includes("video")) {
+        const lowerSrc = (iframeSrc || "").toLowerCase();
+        const docTypes = ["ppt", "pptx", "doc", "docx", "pdf"];
+        const isPptDoc = docTypes.some((type) => lowerSrc.includes("modules/" + type) || lowerSrc.includes("/" + type + "/index.html"));
+        const isInnerBook = lowerSrc.includes("innerbook") || lowerSrc.includes("modules/book");
+        let contentIsDocViewer = false;
+        try {
+          contentIsDocViewer = !!(iframeDocument && iframeDocument.querySelector && (iframeDocument.querySelector("#panView") || iframeDocument.querySelector("embed[type*='pdf'], object[type*='pdf']")));
+        } catch (error) {
+          contentIsDocViewer = false;
+        }
+        if (lowerSrc.includes("video")) {
           return processMedia("video", iframe, iframeDocument, context);
-        } else if (iframeSrc.includes("audio")) {
+        } else if (lowerSrc.includes("audio")) {
           return processMedia("audio", iframe, iframeDocument, context);
-        } else if (["ppt", "doc", "pptx", "docx", "pdf"].some((type) => iframeSrc.includes("modules/" + type))) {
+        } else if (isPptDoc || contentIsDocViewer) {
           return processPpt(iframeWindow, context);
-        } else if (["innerbook"].some((type) => iframeSrc.includes("modules/" + type))) {
+        } else if (isInnerBook) {
           return processBook(iframeWindow);
         }
-        // 兜底：来源类型未匹配时，仍尝试按 .ans-job-icon 判定（兼容旧版 DOM）
-        const ansJobIcon = (_b = iframe.parentElement) == null ? void 0 : _b.querySelector(".ans-job-icon");
-        if (ansJobIcon) {
-          logStore.addLog("未从 iframe 来源识别到 PPT/文档/音视频类型，但发现 .ans-job-icon，暂不自动阅读（建议反馈此日志）", "warning");
-        } else {
-          logStore.addLog("未识别到可处理任务点（iframe 来源不匹配且未找到 .ans-job-icon）", "warning");
+        // 兜底三：沿祖先链查找 .ans-job-icon（图标位置可能已变化）
+        let ansJobIcon = null;
+        try {
+          let node2 = iframe.parentElement;
+          for (let i = 0; i < 6 && node2 && !ansJobIcon; i++) {
+            ansJobIcon = typeof node2.querySelector === "function" ? node2.querySelector(".ans-job-icon") : null;
+            node2 = node2.parentElement;
+          }
+        } catch (error) {
+          ansJobIcon = null;
         }
+        logStore.addLog(`未识别到可处理任务点（src=${(iframeSrc || "(空)").slice(0, 120)}；.ans-job-icon=${ansJobIcon ? "有" : "无"}），请反馈此日志以便适配`, "warning");
       }
       return Promise.resolve();
     };
