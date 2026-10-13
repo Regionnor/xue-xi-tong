@@ -8,6 +8,16 @@
 
 ---
 
+## [1.1] - 2026-10-13
+
+### 🛠 修复 (Fixed) - 2026-10-13
+- **修复网页上的 PPT / 文档任务点不再自动下滑阅读、且提前报「任务完成」的问题**：
+  - 根因：`processIframeBody` 的任务点路由**强依赖**在 `iframe.parentElement` 中查找 `.ans-job-icon` 元素，超星改版后该元素位置/类名变化即导致匹配不到，从而跳过 `processPpt`/`processBook` 的下滑逻辑，最终章节循环结束误报完成。
+  - 改为**优先按 iframe 来源类型（`modules/ppt`、`modules/doc`、`modules/pptx`、`modules/docx`、`modules/pdf`、`modules/innerbook` 等）判定**任务点类型并触发对应处理，不再被 `.ans-job-icon` 的 DOM 位置卡住；`.ans-job-icon` 仅作为来源无法识别时的兜底诊断。
+  - 补充更清晰的跳过原因日志：明确提示「只答题，不做其他」开关开启会跳过自动阅读，以及来源不匹配且找不到 `.ans-job-icon` 时的诊断信息，便于后续排查。
+
+---
+
 ## [1.0] - 2026-10-13
 
 首个改良版本，基于 ScriptCat #711（v0.2.7）重构答题逻辑。

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.0
+// @version      1.1
 // @author       Region
 // @description  🤖 学习通AI答题小助手（Region改良款）：由 ScriptCat 脚本 #711（超星学习通｜知到智慧树 网课小助手）改良而来。移除原版第三方题库与知到智慧树平台，仅专注超星学习通。核心特性：兼容任意 OpenAI 兼容 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等），答题时调用你自己的 AI 自动作答；保留视频播放、章节测试、作业与考试自动完成等能力。使用前请在「答题」设置中填写 AI 接口地址与 API Key。
 // @license      MIT
@@ -6383,21 +6383,26 @@
           return processWork(iframe, iframeDocument, iframeWindow, context);
         }
         if (configStore.platformParams.cx.parts[0].params[2].value) {
-          logStore.addLog("只答题，不做其他已开启，可在设置里调整", "primary");
+          logStore.addLog("只答题，不做其他已开启，已跳过 PPT/文档/音视频的自动阅读（如需自动滑动阅读，请在设置中关闭该项）", "primary");
+          return Promise.resolve();
+        }
+        // 路由：优先按 iframe 来源类型判断任务点类型，避免超星改版后 .ans-job-icon 位置/类名变化导致漏处理、不滑动
+        configStore.menuIndex = HOME_TAB_NAME;
+        if (iframeSrc.includes("video")) {
+          return processMedia("video", iframe, iframeDocument, context);
+        } else if (iframeSrc.includes("audio")) {
+          return processMedia("audio", iframe, iframeDocument, context);
+        } else if (["ppt", "doc", "pptx", "docx", "pdf"].some((type) => iframeSrc.includes("modules/" + type))) {
+          return processPpt(iframeWindow, context);
+        } else if (["innerbook"].some((type) => iframeSrc.includes("modules/" + type))) {
+          return processBook(iframeWindow);
+        }
+        // 兜底：来源类型未匹配时，仍尝试按 .ans-job-icon 判定（兼容旧版 DOM）
+        const ansJobIcon = (_b = iframe.parentElement) == null ? void 0 : _b.querySelector(".ans-job-icon");
+        if (ansJobIcon) {
+          logStore.addLog("未从 iframe 来源识别到 PPT/文档/音视频类型，但发现 .ans-job-icon，暂不自动阅读（建议反馈此日志）", "warning");
         } else {
-          const ansJobIcon = (_b = iframe.parentElement) == null ? void 0 : _b.querySelector(".ans-job-icon");
-          if (ansJobIcon) {
-            configStore.menuIndex = HOME_TAB_NAME;
-            if (iframeSrc.includes("video")) {
-              return processMedia("video", iframe, iframeDocument, context);
-            } else if (iframeSrc.includes("audio")) {
-              return processMedia("audio", iframe, iframeDocument, context);
-            } else if (["ppt", "doc", "pptx", "docx", "pdf"].some((type) => iframeSrc.includes("modules/" + type))) {
-              return processPpt(iframeWindow, context);
-            } else if (["innerbook"].some((type) => iframeSrc.includes("modules/" + type))) {
-              return processBook(iframeWindow);
-            }
-          }
+          logStore.addLog("未识别到可处理任务点（iframe 来源不匹配且未找到 .ans-job-icon）", "warning");
         }
       }
       return Promise.resolve();
