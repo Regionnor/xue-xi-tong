@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.9
+// @version      1.10
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6259,30 +6259,61 @@
             return;
           }
           try {
-            const candidates = [16, 8, 4, 3, 2, 1.75, 1.5, 1.25];
-            let chosen = video.playbackRate || 1;
-            for (const r of candidates) {
+            let chosen = null;
+            const detectMenuMax = () => {
               try {
-                video.playbackRate = r;
-                if (video.playbackRate >= r) {
-                  chosen = r;
-                  break;
+                const docs = [iframeDocument, document];
+                for (const d of docs) {
+                  if (!d || !d.querySelectorAll)
+                    continue;
+                  const nodes = d.querySelectorAll("[class*='playback-rate'], [class*='speed'], .speedMenu, .speed-box");
+                  for (const n of nodes) {
+                    const items = n.querySelectorAll("li, [data-rate], [data-speed], .vjs-menu-item");
+                    for (const it of items) {
+                      const label = (it.textContent || "").trim();
+                      const attr = it.getAttribute("data-rate") || it.getAttribute("data-speed") || "";
+                      const m = label.match(/(\d+(?:\.\d+)?)\s*x/i) || attr.match(/(\d+(?:\.\d+)?)/);
+                      if (m) {
+                        const r = parseFloat(m[1]);
+                        if (r > 0 && r <= 16 && (chosen == null || r > chosen))
+                          chosen = r;
+                      }
+                    }
+                  }
                 }
-                if (video.playbackRate > chosen)
-                  chosen = video.playbackRate;
               } catch (e2) {
               }
+              return chosen;
+            };
+            detectMenuMax();
+            if (chosen == null) {
+              const safe = [2, 1.75, 1.5, 1.25];
+              let c = video.playbackRate || 1;
+              for (const r of safe) {
+                try {
+                  video.playbackRate = r;
+                  if (video.playbackRate >= r) {
+                    c = r;
+                    break;
+                  }
+                  if (video.playbackRate > c)
+                    c = video.playbackRate;
+                } catch (e2) {
+                }
+              }
+              chosen = c;
             }
             try {
               video.playbackRate = chosen;
             } catch (e2) {
             }
-            logStore.addLog(`已设置最高倍速：${chosen}x`, "primary");
+            logStore.addLog(`已设置倍速：${chosen}x（取播放器可选上限，避免超出导致播放失败）`, "primary");
             const reassert = () => {
               if (isFinishedTask(iframe) || !context.isCurrent())
                 return;
               try {
-                video.playbackRate = chosen;
+                if (video.playbackRate < chosen)
+                  video.playbackRate = chosen;
               } catch (e2) {
               }
             };
@@ -6292,7 +6323,18 @@
                 video.removeEventListener("ratechange", reassert);
               } catch (e2) {
               }
-            }, 6e4);
+            }, 3e4);
+            setTimeout(() => {
+              const higher = detectMenuMax();
+              if (higher != null && higher > chosen && !isFinishedTask(iframe) && context.isCurrent()) {
+                chosen = higher;
+                try {
+                  video.playbackRate = chosen;
+                } catch (e2) {
+                }
+                logStore.addLog(`播放器速度菜单已就绪，倍速上调至 ${chosen}x`, "primary");
+              }
+            }, 2500);
           } catch (e2) {
             logStore.addLog(`[诊断] 设置倍速失败：${String(e2)}`, "warning");
           }
