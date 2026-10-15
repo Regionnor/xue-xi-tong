@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.8
+// @version      1.9
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6249,6 +6249,108 @@
           }
           return out;
         };
+        const applyMediaOptimizations = (video) => {
+          if (!video)
+            return;
+          if (!context.isCurrent())
+            return;
+          if (isFinishedTask(iframe)) {
+            logStore.addLog(`任务点已完成，跳过倍速/拖拽优化`, "success");
+            return;
+          }
+          try {
+            const candidates = [16, 8, 4, 3, 2, 1.75, 1.5, 1.25];
+            let chosen = video.playbackRate || 1;
+            for (const r of candidates) {
+              try {
+                video.playbackRate = r;
+                if (video.playbackRate >= r) {
+                  chosen = r;
+                  break;
+                }
+                if (video.playbackRate > chosen)
+                  chosen = video.playbackRate;
+              } catch (e2) {
+              }
+            }
+            try {
+              video.playbackRate = chosen;
+            } catch (e2) {
+            }
+            logStore.addLog(`已设置最高倍速：${chosen}x`, "primary");
+            const reassert = () => {
+              if (isFinishedTask(iframe) || !context.isCurrent())
+                return;
+              try {
+                video.playbackRate = chosen;
+              } catch (e2) {
+              }
+            };
+            video.addEventListener("ratechange", reassert);
+            setTimeout(() => {
+              try {
+                video.removeEventListener("ratechange", reassert);
+              } catch (e2) {
+              }
+            }, 6e4);
+          } catch (e2) {
+            logStore.addLog(`[诊断] 设置倍速失败：${String(e2)}`, "warning");
+          }
+          try {
+            let duration = 0;
+            try {
+              duration = video.duration;
+            } catch (e2) {
+            }
+            if (!duration || !isFinite(duration) || duration <= 0) {
+              logStore.addLog(`[诊断] 视频时长暂不可用，跳过拖拽进度条`, "primary");
+              return;
+            }
+            const secondsBeforeEnd = 5;
+            const target = Math.max(0, duration - secondsBeforeEnd);
+            const before = video.currentTime || 0;
+            let blocked = false;
+            const checkBlocked = () => {
+              try {
+                const t1 = (document.documentElement && document.documentElement.textContent) || "";
+                const t2 = (iframeDocument && iframeDocument.documentElement && iframeDocument.documentElement.textContent) || "";
+                if (t1.indexOf("教师设置无法拖动进度条") >= 0 || t2.indexOf("教师设置无法拖动进度条") >= 0)
+                  blocked = true;
+              } catch (e2) {
+              }
+            };
+            const poll = setInterval(checkBlocked, 200);
+            try {
+              video.currentTime = target;
+            } catch (e2) {
+              logStore.addLog(`[诊断] 设置播放进度失败：${String(e2)}`, "warning");
+            }
+            setTimeout(() => {
+              try {
+                clearInterval(poll);
+              } catch (e2) {
+              }
+              let now = 0;
+              try {
+                now = video.currentTime || 0;
+              } catch (e2) {
+              }
+              if (blocked) {
+                logStore.addLog(`检测到「教师设置无法拖动进度条」，按设定视为已接近结尾，转为正常高倍速播放直至完成`, "warning");
+                return;
+              }
+              if (now >= target - 2) {
+                logStore.addLog(`已拖拽进度条至结束前约 ${secondsBeforeEnd}s（当前 ${now.toFixed(0)}s / 共 ${duration.toFixed(0)}s），等待播放完成`, "success");
+              } else if (now <= before + 1) {
+                logStore.addLog(`进度条无法拖动（已被复位），转为正常高倍速播放直至完成`, "warning");
+              } else {
+                logStore.addLog(`进度条已跳转至 ${now.toFixed(0)}s（目标 ${target.toFixed(0)}s）`, "primary");
+              }
+            }, 1500);
+          } catch (e2) {
+            logStore.addLog(`[诊断] 拖拽进度条失败：${String(e2)}`, "warning");
+          }
+        };
         let mediaFindAttempts = 0;
         const intervalId2 = setInterval(async () => {
           if (settled)
@@ -6293,6 +6395,9 @@
               logStore.addLog(`[诊断] 已找到 <${mediaType}>（src=${String(mediaSrc).slice(0, 90)}），准备播放`, "primary");
               mediaElement.pause();
               mediaElement.muted = true;
+              if (mediaType === "video") {
+                applyMediaOptimizations(mediaElement);
+              }
               if (mediaType === "video") {
                 quiz = watchVideoQuiz({
                   document: iframeDocument,
