@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.10
+// @version      1.11
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1007,18 +1007,49 @@
         event.preventDefault();
         configStore.menuIndex = ANSWER_TAB_NAME$1;
       };
+      const exportLog = () => {
+        try {
+          const list = __props.logList || [];
+          const lines = list.map((it) => {
+            const t = it.time || "";
+            const msg = (it.message || "").replace(/<[^>]+>/g, "");
+            const type = it.type ? `[${it.type}] ` : "";
+            return `${t}  ${type}${msg}`;
+          });
+          const content = lines.join("\r\n");
+          const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+          a.href = url;
+          a.download = `chaoxing-log-${stamp}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (e) {
+        }
+      };
       return (_ctx, _cache) => {
         const _component_el_text = vue.resolveComponent("el-text");
         const _component_el_divider = vue.resolveComponent("el-divider");
-        const _component_el_scrollbar = vue.resolveComponent("el-scrollbar");
+        const _component_el_button = vue.resolveComponent("el-button");
         return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$5, [
-          vue.createVNode(_component_el_scrollbar, {
-            always: "",
+          vue.createElementVNode("div", { class: "log-toolbar" }, [
+            vue.createVNode(_component_el_text, { type: "info", size: "small" }, {
+              default: vue.withCtx(() => [vue.createTextVNode("运行日志")]),
+              _: 1
+            }),
+            vue.createVNode(_component_el_button, { size: "small", onClick: exportLog }, {
+              default: vue.withCtx(() => [vue.createTextVNode("导出")]),
+              _: 1
+            })
+          ]),
+          vue.createElementVNode("div", {
             class: "log",
-            "max-height": "230px",
+            style: { "max-height": "230px", "overflow-x": "hidden", "overflow-y": "auto", "padding": "2px 4px 2px 0", "scrollbar-width": "thin", "scrollbar-color": "#c7d7eb transparent" },
             onClick: handleLogClick
-          }, {
-            default: vue.withCtx(() => [
+          }, [
               (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.logList, (item, index) => {
                 return vue.openBlock(), vue.createElementBlock("div", { key: index }, [
                   vue.createVNode(_component_el_text, {
@@ -1048,9 +1079,7 @@
                   })
                 ]);
               }), 128))
-            ]),
-            _: 1
-          })
+          ])
         ]);
       };
     }

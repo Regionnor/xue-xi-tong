@@ -8,6 +8,17 @@
 
 ---
 
+## [1.11] - 2026-10-16
+
+### 🛠 修复 (Fixed) - 2026-10-16
+- **修复首页日志区「往下拉的条拉不动」（滚动失效）**：首页 `首页` 标签页原本用 Element Plus 的 `<el-scrollbar>` 包裹日志列表。由于整个面板挂载在 **closed shadow DOM**（`attachShadow({mode:"closed"})`）内，而 Element Plus 样式只通过 `GM_addStyle` 注入到页面 `document`，**不会穿透 shadow 边界**，导致 `el-scrollbar` 的滚动条/滑块样式缺失、无法拖拽。
+  - 改为使用**原生可滚动 `<div class="log">`**（通过内联 `style` 设置 `max-height:230px; overflow-y:auto`，内联样式在 shadow DOM 内始终生效），彻底摆脱对 `el-scrollbar` 样式的依赖，日志现在可正常上下滚动。
+
+### ✨ 新增 (Added) - 2026-10-16
+- **首页日志「导出」功能**：在日志区顶部新增工具栏（左侧「运行日志」标题，右侧「导出」按钮）。点击「导出」将当前 `logList` 逐条格式化为 `时间  类型  内容`（自动剔除 HTML 标签），以 UTF-8 文本 Blob 触发浏览器下载为 `chaoxing-log-<时间戳>.txt`。导出逻辑在脚本页面上下文内执行，无需额外 `@grant` 权限。
+
+---
+
 ## [1.10] - 2026-10-15
 
 ### 🛠 修复 (Fixed) - 2026-10-15
