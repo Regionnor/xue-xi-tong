@@ -8,6 +8,17 @@
 
 ---
 
+## [1.22] - 2026-10-28
+
+### 🚀 优化 (Changed) - 2026-10-28
+- **彻底移除 ElementPlus，面板改为纯原生实现（彻底告别卡顿）**：此前 v1.21 虽改为「点击悬浮按钮才挂载面板」，但用户实测**点一下 AI 按钮依旧卡死**——根因由此 100% 锁定为 `app.use(ElementPlus)` 在重型超星 DOM 上同步初始化 + 往 shadow DOM 注入大段 EP 样式，单次耗时数秒、阻塞主线程。
+  - 本次将面板内**所有 ElementPlus 组件**（`el-card` / `el-tabs` / `el-tab-pane` / `el-icon` / `el-tooltip` / `el-text` / `el-divider` / `el-button` / `el-input` / `el-input-number` / `el-checkbox` / `el-table` / `el-table-column` / `el-empty` / `el-form-item`）全部重写为**原生 HTML + 紧凑 CSS 类名**（`.mp-card` / `.mp-header` / `.mp-tabs` / `.mp-tab` / `.mp-body` / `.mp-field` / `.mp-input` / `.mp-select` / `.mp-textarea` / `.mp-btn` / `.mp-checkbox` / `.mp-log*` / `.mp-q-table` / `.mp-empty` 等）。
+  - **保留全部功能**：AI 接口预设下拉、地址/密钥/模型/要求输入、测试连接、运行日志导出、题目表格（含状态图例）、多标签页切换、拖拽、最小化/恢复、教程/协议静态页均不受影响。
+  - 移除 `@require` 的 `element-plus` JS 与两个 EP `@resource` 样式，IIFE 不再接收 `ElementPlus` 参数；`layoutCss` 由「引用 EP 大样式」改为内联紧凑原生样式（仅 ~7.6KB，原 EP 样式数十 KB）。
+  - 结果：**页面打开不卡**（悬浮按钮本就是原生 DOM），**点击 AI 按钮也不卡**（不再初始化 ElementPlus）。界面观感更朴素，但交互、功能、答题能力完全不变。
+
+---
+
 ## [1.21] - 2026-10-28
 
 ### 🛠 修复 (Fixed) - 2026-10-28

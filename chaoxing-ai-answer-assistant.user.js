@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.21
+// @version      1.22
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -16,12 +16,9 @@
 // @require      https://lib.baomitu.com/vue/3.4.31/vue.global.prod.js
 // @require      https://lib.baomitu.com/vue-demi/0.14.7/index.iife.js
 // @require      data:application/javascript,window.Vue%3DVue%3B
-// @require      https://lib.baomitu.com/element-plus/2.7.2/index.full.min.js
 // @require      https://lib.baomitu.com/pinia/2.3.1/pinia.iife.min.js
 // @require      https://lib.baomitu.com/rxjs/7.8.2/rxjs.umd.min.js
 // @require      https://lib.baomitu.com/blueimp-md5/2.19.0/js/md5.min.js
-// @resource     ElementPlus       https://lib.baomitu.com/element-plus/2.7.2/index.css
-// @resource     ElementPlusStyle  https://lib.baomitu.com/element-plus/2.8.2/index.min.css
 // @resource     ttf               https://www.forestpolice.org/ttf/2.0/table.json
 // @connect      *
 // @grant        GM_addStyle
@@ -38,7 +35,7 @@
 
 (e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const i=document.createElement("style");i.textContent=e,document.head.append(i)})(' .main-page .guide-page{box-sizing:border-box;max-height:min(400px,calc(100vh - 160px));max-height:min(400px,calc(100dvh - 160px));overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 0;color:#4e5969;font-size:12px;line-height:1.7;scrollbar-width:thin;scrollbar-color:#c7d7eb transparent}.main-page .guide-page:focus-visible{outline:2px solid #176ae5;outline-offset:2px;border-radius:8px}.main-page .guide-header{margin:0 0 10px;padding:11px 12px;border:1px solid #d9e8fc;border-radius:9px;background:linear-gradient(120deg,#edf5ff 0%,#f8fbff 100%)}.main-page .guide-heading-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.main-page .guide-title{margin:0;color:#174b94;font-size:13px;font-weight:600;line-height:1.6}.main-page .guide-tag{flex-shrink:0;padding:1px 7px;border:1px solid #d4e5fc;border-radius:20px;background-color:#fff;color:#2262b5;font-size:10px;line-height:18px}.main-page .guide-subtitle{margin:3px 0 0;color:#61758e;font-size:11px}.main-page .guide-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.main-page .guide-card{min-width:0;padding:10px;border:1px solid #e4eaf2;border-radius:8px;background-color:#fff}.main-page .guide-card-heading{display:flex;align-items:center;gap:8px;margin-bottom:6px}.main-page .guide-number{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;height:24px;border-radius:7px;background-color:#eaf3ff;color:#176ae5;font-size:11px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}.main-page .guide-card-title{margin:0;color:#263a55;font-size:12px;font-weight:600;line-height:1.6}.main-page .guide-copy{margin:0;overflow-wrap:anywhere}.main-page .guide-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:10px 0 0;padding:9px 4px 7px;border-radius:7px;background-color:#f3f7fd;list-style:none}.main-page .guide-flow-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;color:#3a5a83;font-size:10px;line-height:18px;text-align:center}.main-page .guide-flow-step+.guide-flow-step:before{position:absolute;top:8px;left:-5px;width:5px;height:5px;border-top:1px solid #9cb8da;border-right:1px solid #9cb8da;content:"";transform:rotate(45deg)}.main-page .guide-flow-number{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #d5e4f8;border-radius:50%;background-color:#fff;color:#176ae5;font-size:11px;font-weight:600;line-height:1}.main-page{--app-font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";--el-font-family: var(--app-font-family);z-index:100003;position:fixed;color:#1f2329;font-family:var(--app-font-family)!important;font-size:14px;line-height:1.5715;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}.main-page *,.main-page input,.main-page button,.main-page textarea{font-family:var(--app-font-family)!important;letter-spacing:0}.main-page .el-card,.main-page .el-tabs,.main-page .el-text,.main-page .el-button,.main-page .el-input,.main-page .el-input__inner,.main-page .el-input-number,.main-page .el-table{font-family:var(--app-font-family)!important}.main-page .overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1001}.main-page .el-card{border:0}.main-page .card-header{display:flex;justify-content:space-between;flex-direction:row;align-items:center;margin:0;padding:0;cursor:move}.main-page .card-header .title{font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:500}.main-page .warning-icon{margin-left:5px}.main-page .zoom-icon{cursor:pointer}.main-page .zoom-icon.is-spaced{margin-left:8px}.main-page .minus{margin:5px 10px -10px 0}.main-page .compact-divider{margin:0}.main-page .demo-tabs{display:initial}.main-page .el-card__header{background-color:#1f71e0;color:#fff;padding:7px 10px 7px 16px;margin:0}.main-page .el-card__body{padding:0 16px 20px}.main-page .el-tabs__nav-wrap:after{height:1px}.main-page .el-tabs__active-bar{background-color:#176ae5}.main-page .el-tabs__item{font-size:13px;height:34px}.main-page .el-tabs__item.is-top{font-weight:400;color:#4e5969;padding:0 8px 0 12px}.main-page .el-tabs__item.is-active{font-weight:500;color:#176ae5;padding:0 8px 0 12px}.main-page .script-home{padding-top:2px}.main-page .announcement-board{box-sizing:border-box;margin:2px 0 10px;padding:8px 10px;border:1px solid #bae0ff;border-radius:6px;background-color:#e6f4ff}.main-page .announcement-heading{display:flex;align-items:center;gap:6px;margin-bottom:4px;color:#0958d9;font-size:12px;font-weight:600;line-height:20px}.main-page .announcement-heading:before{content:"";width:6px;height:6px;flex:0 0 auto;border-radius:50%;background-color:#1677ff}.main-page .announcement-list{display:grid;gap:3px;margin:0;padding:0;list-style:none}.main-page .announcement-item{color:#1f2329;font-size:12px;line-height:20px;word-break:break-word}.main-page .log .el-text{font-weight:400;white-space:normal}.main-page .log-time{font-weight:400}.main-page .log-action-link{color:#176ae5;cursor:pointer;text-decoration:none}.main-page .log-action-link:hover{color:#409eff;text-decoration:underline}.main-page .log-divider{margin:0}.main-page .token-input,.main-page .question-list{font-size:12px}.main-page .token-label{border-radius:0}.main-page .question_table{width:625px}.main-page .answer-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 2px 8px;font-size:11px;line-height:18px}.main-page .answer-legend>span{display:inline-flex;align-items:center;gap:5px}.main-page .answer-legend>span:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.main-page .answer-result{line-height:1.7;overflow-wrap:anywhere}.main-page .answer-result--success{color:#15803d}.main-page .answer-result--searching{color:#a15c08}.main-page .answer-result--pending{color:#697586}.main-page .answer-result--error{color:#c73e38}.main-page .setting{margin-top:-8px;font-size:14px}.main-page .setting-section-title{font-size:13px}.main-page .setting-checkbox{margin-bottom:6px}.main-page .setting-number{margin-top:6px}.main-page .setting .el-form-item{margin-bottom:0} ');
 
-(function (vue, pinia, rxjs, md5, ElementPlus) {
+(function (vue, pinia, rxjs, md5) {
   'use strict';
 
   var __defProp = Object.defineProperty;
@@ -1031,52 +1028,23 @@
         }
       };
       return (_ctx, _cache) => {
-        const _component_el_text = vue.resolveComponent("el-text");
-        const _component_el_divider = vue.resolveComponent("el-divider");
-        const _component_el_button = vue.resolveComponent("el-button");
         return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$5, [
-          vue.createElementVNode("div", { class: "log-toolbar" }, [
-            vue.createVNode(_component_el_text, { type: "info", size: "small" }, {
-              default: vue.withCtx(() => [vue.createTextVNode("运行日志")]),
-              _: 1
-            }),
-            vue.createVNode(_component_el_button, { size: "small", onClick: exportLog }, {
-              default: vue.withCtx(() => [vue.createTextVNode("导出")]),
-              _: 1
-            })
+          vue.createElementVNode("div", { class: "mp-log-toolbar" }, [
+            vue.createElementVNode("span", { class: "mp-log-title" }, "运行日志"),
+            vue.createElementVNode("button", { class: "mp-btn", onClick: exportLog }, "导出")
           ]),
           vue.createElementVNode("div", {
-            class: "log",
-            style: { "max-height": "230px", "overflow-x": "hidden", "overflow-y": "auto", "padding": "2px 4px 2px 0", "scrollbar-width": "thin", "scrollbar-color": "#c7d7eb transparent" },
+            class: "mp-log",
             onClick: handleLogClick
           }, [
               (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.logList, (item, index) => {
-                return vue.openBlock(), vue.createElementBlock("div", { key: index }, [
-                  vue.createVNode(_component_el_text, {
-                    class: "log-time",
-                    size: "small",
-                    type: "info"
+                return vue.openBlock(), vue.createElementBlock("div", { key: index, class: "mp-log-item" }, [
+                  vue.createElementVNode("span", { class: "mp-log-time" }, vue.toDisplayString(item.time), 1),
+                  vue.createElementVNode("span", {
+                    class: "mp-log " + (item.type || "primary")
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode(vue.toDisplayString(item.time), 1)
-                    ]),
-                    _: 2
-                  }, 1024),
-                  vue.createVNode(_component_el_text, null, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode(" ")
-                    ]),
-                    _: 1
-                  }),
-                  vue.createVNode(_component_el_text, {
-                    type: item.type ? item.type : "primary",
-                    size: "small",
                     innerHTML: item.message
-                  }, null, 8, ["type", "innerHTML"]),
-                  vue.createVNode(_component_el_divider, {
-                    class: "log-divider",
-                    "border-style": "dashed"
-                  })
+                  }, 8, ["innerHTML"])
                 ]);
               }), 128))
           ])
@@ -1094,89 +1062,70 @@
     },
     setup(__props) {
       return (_ctx, _cache) => {
-        const _component_el_divider = vue.resolveComponent("el-divider");
-        const _component_el_checkbox = vue.resolveComponent("el-checkbox");
-        const _component_el_input_number = vue.resolveComponent("el-input-number");
-        const _component_el_form_item = vue.resolveComponent("el-form-item");
         return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$4, [
           (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.globalConfig.platformParams[_ctx.globalConfig.platformName].parts, (part) => {
             return vue.openBlock(), vue.createElementBlock("div", {
               key: part.name
             }, [
-              vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
-                default: vue.withCtx(() => [
-                  vue.createElementVNode("span", _hoisted_2$4, vue.toDisplayString(part.name), 1)
-                ]),
-                _: 2
-              }, 1024),
+              vue.createElementVNode("div", { class: "mp-divider" }),
+              vue.createElementVNode("div", { class: "mp-section-title" }, vue.toDisplayString(part.name), 1),
               (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(part.params, (param) => {
                 return vue.openBlock(), vue.createElementBlock(vue.Fragment, {
                   key: param.name
                 }, [
-                  param.type === "boolean" ? (vue.openBlock(), vue.createBlock(_component_el_checkbox, {
-                    key: 0,
-                    class: "setting-checkbox",
-                    modelValue: param.value,
-                    "onUpdate:modelValue": ($event) => param.value = $event,
-                    label: param.name,
-                    size: "small"
-                  }, null, 8, ["modelValue", "onUpdate:modelValue", "label"])) : (vue.openBlock(), vue.createBlock(_component_el_form_item, {
-                    key: 1,
-                    label: param.name,
-                    required: ""
-                  }, {
-                    default: vue.withCtx(() => [
-                      vue.createVNode(_component_el_input_number, {
-                        modelValue: param.value,
-                        "onUpdate:modelValue": ($event) => param.value = $event,
-                        min: param.min ?? 3e3,
-                        max: param.max,
-                        step: param.step ?? 1e3,
-                        "controls-position": "right",
-                        size: "small"
-                      }, null, 8, ["modelValue", "onUpdate:modelValue", "min", "max", "step"])
-                    ]),
-                    _: 2
-                  }, 1032, ["label"]))
+                  param.type === "boolean"
+                    ? (vue.openBlock(), vue.createElementVNode("label", { class: "mp-checkbox" }, [
+                        vue.createElementVNode("input", {
+                          type: "checkbox",
+                          checked: param.value,
+                          onChange: ($event) => { param.value = $event.target.checked; }
+                        }, null, 8, ["checked", "onChange"]),
+                        vue.createElementVNode("span", null, vue.toDisplayString(param.name), 1)
+                      ]))
+                    : (vue.openBlock(), vue.createElementVNode("div", { class: "mp-field" }, [
+                        vue.createElementVNode("span", { class: "mp-label" }, vue.toDisplayString(param.name), 1),
+                        vue.createElementVNode("input", {
+                          class: "mp-input",
+                          type: "number",
+                          value: param.value,
+                          min: param.min ?? 3e3,
+                          max: param.max,
+                          step: param.step ?? 1e3,
+                          onChange: ($event) => { param.value = Number($event.target.value); }
+                        }, null, 8, ["value", "min", "max", "step", "onChange"])
+                      ]))
                 ], 64);
               }), 128))
             ]);
           }), 128)),
           vue.createElementVNode("div", null, [
-            vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
-              default: vue.withCtx(() => [
-                vue.createElementVNode("span", _hoisted_3$2, vue.toDisplayString(_ctx.globalConfig.otherParams.name), 1)
-              ]),
-              _: 1
-            }),
+            vue.createElementVNode("div", { class: "mp-divider" }),
+            vue.createElementVNode("div", { class: "mp-section-title" }, vue.toDisplayString(_ctx.globalConfig.otherParams.name), 1),
             (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.globalConfig.otherParams.params, (item) => {
               return vue.openBlock(), vue.createElementBlock(vue.Fragment, {
                 key: item.name
               }, [
-                item.type === "boolean" ? (vue.openBlock(), vue.createBlock(_component_el_checkbox, {
-                  key: 0,
-                  modelValue: item.value,
-                  "onUpdate:modelValue": ($event) => item.value = $event,
-                  size: "small"
-                }, null, 8, ["modelValue", "onUpdate:modelValue"])) : (vue.openBlock(), vue.createBlock(_component_el_form_item, {
-                  key: 1,
-                  class: "setting-number",
-                  label: item.name,
-                  required: "",
-                  size: "small"
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.createVNode(_component_el_input_number, {
-                      modelValue: item.value,
-                      "onUpdate:modelValue": ($event) => item.value = $event,
-                      min: item.min ?? 3,
-                      max: item.max ?? 100,
-                      step: item.step ?? 1,
-                      size: "small"
-                    }, null, 8, ["modelValue", "onUpdate:modelValue", "min", "max", "step"])
-                  ]),
-                  _: 2
-                }, 1032, ["label"]))
+                item.type === "boolean"
+                  ? (vue.openBlock(), vue.createElementVNode("label", { class: "mp-checkbox" }, [
+                      vue.createElementVNode("input", {
+                        type: "checkbox",
+                        checked: item.value,
+                        onChange: ($event) => { item.value = $event.target.checked; }
+                      }, null, 8, ["checked", "onChange"]),
+                      vue.createElementVNode("span", null, vue.toDisplayString(item.name), 1)
+                    ]))
+                  : (vue.openBlock(), vue.createElementVNode("div", { class: "mp-field" }, [
+                      vue.createElementVNode("span", { class: "mp-label" }, vue.toDisplayString(item.name), 1),
+                      vue.createElementVNode("input", {
+                        class: "mp-input",
+                        type: "number",
+                        value: item.value,
+                        min: item.min ?? 3,
+                        max: item.max ?? 100,
+                        step: item.step ?? 1,
+                        onChange: ($event) => { item.value = Number($event.target.value); }
+                      }, null, 8, ["value", "min", "max", "step", "onChange"])
+                    ]))
               ], 64);
             }), 128))
           ])
@@ -1281,142 +1230,99 @@
       };
       const getAnswerStatus = (question) => question.answerStatus ?? (question.answer.length ? "success" : "pending");
       return (_ctx, _cache) => {
-        const _component_el_input = vue.resolveComponent("el-input");
-        const _component_el_checkbox = vue.resolveComponent("el-checkbox");
-        const _component_el_divider = vue.resolveComponent("el-divider");
-        const _component_el_table_column = vue.resolveComponent("el-table-column");
-        const _component_el_table = vue.resolveComponent("el-table");
-        const _component_el_empty = vue.resolveComponent("el-empty");
+        const ai = vue.unref(configStore).aiConfig;
         return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
-          vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
-            default: vue.withCtx(() => [
-              vue.createElementVNode("span", _hoisted_3$2, "AI 接口答题")
-            ]),
-            _: 1
-          }),
-          vue.createVNode(_component_el_checkbox, {
-            class: "setting-checkbox",
-            modelValue: vue.unref(configStore).aiConfig.enabled,
-            "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => vue.unref(configStore).aiConfig.enabled = $event),
-            label: "启用 AI 接口答题",
-            size: "small"
-          }, null, 8, ["modelValue", "onUpdate:modelValue", "label"]),
+          vue.createElementVNode("div", { class: "mp-section-title" }, "AI 接口答题"),
+          vue.createElementVNode("label", { class: "mp-checkbox" }, [
+            vue.createElementVNode("input", {
+              type: "checkbox",
+              checked: ai.enabled,
+              onChange: function ($event) { ai.enabled = $event.target.checked; }
+            }, null, 8, ["checked", "onChange"]),
+            vue.createElementVNode("span", null, "启用 AI 接口答题")
+          ]),
           vue.createElementVNode("select", {
             value: vue.unref(currentPreset),
-            onChange: ($event) => applyPreset($event.target.value),
-            style: { width: "100%", marginBottom: "6px", padding: "4px 6px", fontSize: "12px", boxSizing: "border-box", borderRadius: "4px", border: "1px solid #dcdfe6", background: "#fff", color: "#303133" }
+            onChange: function ($event) { applyPreset($event.target.value); },
+            class: "mp-select"
           }, [
-            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, (p) => {
+            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, function (p) {
               return vue.openBlock(), vue.createVNode("option", { key: p.value, value: p.value }, vue.toDisplayString(p.label), 9, ["value"]);
             }), 256))
           ]),
-          vue.createVNode(_component_el_input, {
-            class: "token-input",
-            modelValue: vue.unref(configStore).aiConfig.baseUrl,
-            "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => vue.unref(configStore).aiConfig.baseUrl = $event),
-            placeholder: "AI 接口地址，如 https://api.openai.com/v1",
-            size: "small"
-          }, {
-            prepend: vue.withCtx(() => [
-              vue.createElementVNode("span", null, "地址")
-            ])
-          }, 8, ["modelValue"]),
-          vue.createVNode(_component_el_input, {
-            class: "token-input",
-            modelValue: vue.unref(configStore).aiConfig.apiKey,
-            "onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => vue.unref(configStore).aiConfig.apiKey = $event),
-            type: "password",
-            placeholder: "AI 密钥（API Key）",
-            size: "small"
-          }, {
-            prepend: vue.withCtx(() => [
-              vue.createElementVNode("span", null, "密钥")
-            ])
-          }, 8, ["modelValue", "type"]),
-          vue.createVNode(_component_el_input, {
-            class: "token-input",
-            modelValue: vue.unref(configStore).aiConfig.model,
-            "onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => vue.unref(configStore).aiConfig.model = $event),
-            placeholder: "AI 模型，如 gpt-4o-mini / deepseek-chat",
-            size: "small"
-          }, {
-            prepend: vue.withCtx(() => [
-              vue.createElementVNode("span", null, "模型")
-            ])
-          }, 8, ["modelValue"]),
-          vue.createVNode(_component_el_input, {
-            class: "token-input",
-            modelValue: vue.unref(configStore).aiConfig.customInstruction,
-            "onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => vue.unref(configStore).aiConfig.customInstruction = $event),
-            type: "textarea",
-            placeholder: "可选的额外答题要求（可留空）",
-            size: "small",
-            autosize: { minRows: 1, maxRows: 3 }
-          }, {
-            prepend: vue.withCtx(() => [
-              vue.createElementVNode("span", null, "要求")
-            ])
-          }, 8, ["modelValue", "type"]),
+          vue.createElementVNode("div", { class: "mp-field" }, [
+            vue.createElementVNode("span", { class: "mp-label" }, "地址"),
+            vue.createElementVNode("input", {
+              class: "mp-input",
+              value: ai.baseUrl,
+              placeholder: "AI 接口地址，如 https://api.openai.com/v1",
+              onInput: function ($event) { ai.baseUrl = $event.target.value; }
+            }, null, 8, ["value", "onInput"])
+          ]),
+          vue.createElementVNode("div", { class: "mp-field" }, [
+            vue.createElementVNode("span", { class: "mp-label" }, "密钥"),
+            vue.createElementVNode("input", {
+              class: "mp-input",
+              type: "password",
+              value: ai.apiKey,
+              placeholder: "AI 密钥（API Key）",
+              onInput: function ($event) { ai.apiKey = $event.target.value; }
+            }, null, 8, ["value", "onInput"])
+          ]),
+          vue.createElementVNode("div", { class: "mp-field" }, [
+            vue.createElementVNode("span", { class: "mp-label" }, "模型"),
+            vue.createElementVNode("input", {
+              class: "mp-input",
+              value: ai.model,
+              placeholder: "AI 模型，如 gpt-4o-mini / deepseek-chat",
+              onInput: function ($event) { ai.model = $event.target.value; }
+            }, null, 8, ["value", "onInput"])
+          ]),
+          vue.createElementVNode("div", { class: "mp-field" }, [
+            vue.createElementVNode("span", { class: "mp-label" }, "要求"),
+            vue.createElementVNode("textarea", {
+              class: "mp-textarea",
+              value: ai.customInstruction,
+              placeholder: "可选的额外答题要求（可留空）",
+              onInput: function ($event) { ai.customInstruction = $event.target.value; }
+            }, null, 8, ["value", "onInput"])
+          ]),
           vue.createElementVNode("button", {
             type: "button",
+            class: "mp-btn primary",
             onClick: testConnection,
-            disabled: vue.unref(testLoading),
-            style: { marginRight: "8px", padding: "4px 10px", fontSize: "12px", cursor: "pointer", borderRadius: "4px", border: "1px solid #409eff", background: vue.unref(testLoading) ? "#a0cfff" : "#409eff", color: "#fff" }
+            disabled: vue.unref(testLoading)
           }, vue.unref(testLoading) ? "测试中…" : "测试连接"),
-          vue.unref(testResult) ? vue.createVNode("span", {
+          vue.unref(testResult) ? vue.createElementVNode("span", {
             style: { color: vue.unref(testResult).ok ? "#67c23a" : "#f56c6c", fontSize: "12px" }
           }, vue.toDisplayString(vue.unref(testResult).msg), 1) : null,
           vue.withDirectives(vue.createElementVNode("div", _hoisted_1$3, [
             _hoisted_2$3,
-            vue.createVNode(_component_el_table, {
-              stripe: "",
-              data: _ctx.questionList,
-              "max-height": "400",
-              class: "question-list"
-            }, {
-              default: vue.withCtx(() => [
-                vue.createVNode(_component_el_table_column, {
-                  type: "index",
-                  width: "40"
-                }),
-                vue.createVNode(_component_el_table_column, {
-                  prop: "title",
-                  label: "题目",
-                  width: "370"
-                }, {
-                  default: vue.withCtx((scope) => [
-                    vue.createElementVNode("span", {
-                      innerHTML: getDisplayTitle(scope.row)
-                    }, null, 8, _hoisted_3$1)
-                  ]),
-                  _: 1
-                }),
-                vue.createVNode(_component_el_table_column, {
-                  prop: "answer",
-                  label: "答案",
-                  width: "215"
-                }, {
-                  default: vue.withCtx((scope) => [
-                    vue.createElementVNode("div", {
-                      class: vue.normalizeClass(["answer-result", `answer-result--${getAnswerStatus(scope.row)}`])
-                    }, [
-                      getAnswerStatus(scope.row) === "pending" ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_4$2, "等待查询…")) : getAnswerStatus(scope.row) === "searching" ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_5, "正在查询答案…")) : (vue.openBlock(), vue.createElementBlock("div", {
-                        key: 2,
-                        innerHTML: scope.row.answer.join()
-                      }, null, 8, _hoisted_6))
-                    ], 2)
-                  ]),
-                  _: 1
-                })
+            vue.createElementVNode("table", { class: "mp-q-table" }, [
+              vue.createElementVNode("thead", null, [
+                vue.createElementVNode("tr", null, [
+                  vue.createElementVNode("th", null, "#"),
+                  vue.createElementVNode("th", null, "题目"),
+                  vue.createElementVNode("th", null, "答案")
+                ])
               ]),
-              _: 1
-            }, 8, ["data"])
+              vue.createElementVNode("tbody", null, [
+                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.questionList, function (q, i) {
+                  const st = getAnswerStatus(q);
+                  return vue.openBlock(), vue.createElementVNode("tr", { key: i }, [
+                    vue.createElementVNode("td", null, vue.toDisplayString(i + 1), 1),
+                    vue.createElementVNode("td", { innerHTML: getDisplayTitle(q) }, null, 8, _hoisted_3$1),
+                    vue.createElementVNode("td", null, [
+                      st === "pending" ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_4$2, "等待查询…")) : st === "searching" ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_5, "正在查询答案…")) : (vue.openBlock(), vue.createElementBlock("span", { key: 2, innerHTML: q.answer.join() }, null, 8, _hoisted_6))
+                    ])
+                  ]);
+                }), 128))
+              ])
+            ])
           ], 512), [
             [vue.vShow, _ctx.questionList.length]
           ]),
-          vue.withDirectives(vue.createElementVNode("div", null, [
-            vue.createVNode(_component_el_empty, { description: "该页面无需答题" })
-          ], 512), [
+          vue.withDirectives(vue.createElementVNode("div", { class: "mp-empty" }, "该页面无需答题", 512), [
             [vue.vShow, !_ctx.questionList.length]
           ])
         ], 64);
@@ -7014,33 +6920,21 @@
         }
       ]);
       return (_ctx, _cache) => {
-        const _component_el_tab_pane = vue.resolveComponent("el-tab-pane");
-        const _component_el_tabs = vue.resolveComponent("el-tabs");
+        const activeTab = tabs.value.find((t) => t.name === vue.unref(configStore).menuIndex);
         return vue.openBlock(), vue.createElementBlock("div", {
           style: vue.normalizeStyle({ width: cardWidth.value }),
           class: "card_content"
         }, [
-          vue.createVNode(_component_el_tabs, {
-            modelValue: vue.unref(configStore).menuIndex,
-            "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => vue.unref(configStore).menuIndex = $event),
-            class: "demo-tabs"
-          }, {
-            default: vue.withCtx(() => [
-              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tabs.value, (tab) => {
-                return vue.openBlock(), vue.createBlock(_component_el_tab_pane, {
-                  key: tab.name,
-                  name: tab.name,
-                  label: tab.label
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.unref(configStore).menuIndex === tab.name ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(tab.component), vue.mergeProps({ ref_for: true }, tab.props), null, 16)) : null
-                  ]),
-                  _: 2
-                }, 1032, ["name", "label"]);
-              }), 128))
-            ]),
-            _: 1
-          }, 8, ["modelValue"])
+          vue.createElementVNode("div", { class: "mp-tabs" }, [
+            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tabs.value, (tab) => {
+              return vue.openBlock(), vue.createElementVNode("button", {
+                key: tab.name,
+                class: vue.normalizeClass(["mp-tab", { active: vue.unref(configStore).menuIndex === tab.name }]),
+                onClick: ($event) => vue.unref(configStore).menuIndex = tab.name
+              }, vue.toDisplayString(tab.label), 9, ["onClick"]);
+            }), 128))
+          ]),
+          activeTab ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(activeTab.component), vue.mergeProps({ ref_for: true }, activeTab.props), null, 16)) : null
         ], 4);
       };
     }
@@ -7054,31 +6948,22 @@
         emit("toggleZoom", value);
       };
       return (_ctx, _cache) => {
-        const _component_el_icon = vue.resolveComponent("el-icon");
         return vue.openBlock(), vue.createElementBlock("div", {
           onMousedown: _cache[2] || (_cache[2] = vue.withModifiers(() => {
           }, ["stop"]))
         }, [
-          vue.createVNode(_component_el_icon, {
-            onClick: _cache[0] || (_cache[0] = ($event) => toggleZoom(true)),
+          vue.createElementVNode("span", {
             class: "zoom-icon",
-            size: "small"
-          }, {
-            default: vue.withCtx(() => [
-              vue.createVNode(vue.unref(minus_default))
-            ]),
-            _: 1
-          }),
-          vue.createVNode(_component_el_icon, {
-            onClick: _cache[1] || (_cache[1] = ($event) => toggleZoom(false)),
+            onClick: _cache[0] || (_cache[0] = ($event) => toggleZoom(true))
+          }, [
+            vue.createVNode(vue.unref(minus_default))
+          ]),
+          vue.createElementVNode("span", {
             class: "zoom-icon is-spaced",
-            size: "small"
-          }, {
-            default: vue.withCtx(() => [
-              vue.createVNode(vue.unref(full_screen_default))
-            ]),
-            _: 1
-          })
+            onClick: _cache[1] || (_cache[1] = ($event) => toggleZoom(false))
+          }, [
+            vue.createVNode(vue.unref(full_screen_default))
+          ])
         ], 32);
       };
     }
@@ -7154,11 +7039,6 @@
         document.removeEventListener("mouseup", endDrag);
       };
       return (_ctx, _cache) => {
-        const _component_el_icon = vue.resolveComponent("el-icon");
-        const _component_el_tooltip = vue.resolveComponent("el-tooltip");
-        const _component_el_text = vue.resolveComponent("el-text");
-        const _component_el_divider = vue.resolveComponent("el-divider");
-        const _component_el_card = vue.resolveComponent("el-card");
         return vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", {
           style: vue.normalizeStyle(moveStyle.value),
           class: "main-page"
@@ -7166,70 +7046,36 @@
           vue.withDirectives(vue.createElementVNode("div", _hoisted_1, null, 512), [
             [vue.vShow, isDragging.value]
           ]),
-          vue.createVNode(_component_el_card, {
-            "close-on-click-modal": false,
-            "lock-scroll": false,
-            modal: false,
-            "show-close": false,
-            "modal-class": "modal"
-          }, {
-            header: vue.withCtx(() => [
-              vue.createElementVNode("div", {
-                class: "card-header",
-                onMousedown: startDrag
-              }, [
-                vue.createElementVNode("div", _hoisted_2, [
-                  vue.createElementVNode("span", null, vue.toDisplayString(currentPlatformName.value), 1),
-                  vue.createVNode(_component_el_tooltip, {
-                    teleported: "",
-                    effect: "dark",
-                    placement: "top-start",
-                    content: "<span>注意事项：<br/>请尽量使用新版，不要使用旧版。<br/></span>",
-                    "raw-content": ""
-                  }, {
-                    default: vue.withCtx(() => [
-                      vue.createVNode(_component_el_icon, {
-                        class: "warning-icon",
-                        size: "small"
-                      }, {
-                        default: vue.withCtx(() => [
-                          vue.createVNode(vue.unref(warning_default))
-                        ]),
-                        _: 1
-                      })
-                    ]),
-                    _: 1
-                  })
-                ]),
-                vue.createVNode(_sfc_main$2, {
-                  onToggleZoom: _cache[0] || (_cache[0] = ($event) => vue.unref(configStore).isMinus = $event)
-                })
-              ], 32)
+          vue.createElementVNode("div", { class: "mp-card" }, [
+            vue.createElementVNode("div", {
+              class: "mp-header",
+              onMousedown: startDrag
+            }, [
+              vue.createElementVNode("div", _hoisted_2, [
+                vue.createElementVNode("span", { class: "mp-title" }, vue.toDisplayString(currentPlatformName.value), 1),
+                vue.createElementVNode("span", {
+                  class: "warning-icon",
+                  title: "注意事项：请尽量使用新版，不要使用旧版。"
+                }, [
+                  vue.createVNode(vue.unref(warning_default))
+                ])
+              ]),
+              vue.createVNode(_sfc_main$2, {
+                onToggleZoom: _cache[0] || (_cache[0] = ($event) => vue.unref(configStore).isMinus = $event)
+              })
             ]),
-            default: vue.withCtx(() => [
+            vue.createElementVNode("div", { class: "mp-body" }, [
               vue.withDirectives(vue.createVNode(_sfc_main$3, { onCustomEvent: handleVisibleChange }, null, 512), [
                 [vue.vShow, !vue.unref(configStore).isMinus]
               ]),
               vue.withDirectives(vue.createElementVNode("div", _hoisted_3, [
-                vue.createVNode(_component_el_text, {
-                  type: "info",
-                  size: "small"
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.createTextVNode("已最小化，点击上方按钮恢复")
-                  ]),
-                  _: 1
-                }),
-                vue.createVNode(_component_el_divider, {
-                  class: "compact-divider",
-                  "border-style": "dashed"
-                })
+                vue.createElementVNode("span", { class: "mp-minhint" }, "已最小化，点击上方按钮恢复"),
+                vue.createElementVNode("div", { class: "mp-divider" })
               ], 512), [
                 [vue.vShow, vue.unref(configStore).isMinus]
               ])
-            ]),
-            _: 1
-          })
+            ])
+          ])
         ], 4)), [
           [vue.vShow, isShow.value]
         ]);
@@ -7257,11 +7103,9 @@
     const t = GM_getResourceText(e);
     return GM_addStyle(t), t;
   };
-  cssLoader("ElementPlus");
-  const layoutCss = '.main-page .guide-page{box-sizing:border-box;max-height:min(400px,calc(100vh - 160px));max-height:min(400px,calc(100dvh - 160px));overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 0;color:#4e5969;font-size:12px;line-height:1.7;scrollbar-width:thin;scrollbar-color:#c7d7eb transparent}.main-page .guide-page:focus-visible{outline:2px solid #176ae5;outline-offset:2px;border-radius:8px}.main-page .guide-header{margin:0 0 10px;padding:11px 12px;border:1px solid #d9e8fc;border-radius:9px;background:linear-gradient(120deg,#edf5ff 0%,#f8fbff 100%)}.main-page .guide-heading-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.main-page .guide-title{margin:0;color:#174b94;font-size:13px;font-weight:600;line-height:1.6}.main-page .guide-tag{flex-shrink:0;padding:1px 7px;border:1px solid #d4e5fc;border-radius:20px;background-color:#fff;color:#2262b5;font-size:10px;line-height:18px}.main-page .guide-subtitle{margin:3px 0 0;color:#61758e;font-size:11px}.main-page .guide-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.main-page .guide-card{min-width:0;padding:10px;border:1px solid #e4eaf2;border-radius:8px;background-color:#fff}.main-page .guide-card-heading{display:flex;align-items:center;gap:8px;margin-bottom:6px}.main-page .guide-number{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;height:24px;border-radius:7px;background-color:#eaf3ff;color:#176ae5;font-size:11px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}.main-page .guide-card-title{margin:0;color:#263a55;font-size:12px;font-weight:600;line-height:1.6}.main-page .guide-copy{margin:0;overflow-wrap:anywhere}.main-page .guide-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:10px 0 0;padding:9px 4px 7px;border-radius:7px;background-color:#f3f7fd;list-style:none}.main-page .guide-flow-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;color:#3a5a83;font-size:10px;line-height:18px;text-align:center}.main-page .guide-flow-step+.guide-flow-step:before{position:absolute;top:8px;left:-5px;width:5px;height:5px;border-top:1px solid #9cb8da;border-right:1px solid #9cb8da;content:"";transform:rotate(45deg)}.main-page .guide-flow-number{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #d5e4f8;border-radius:50%;background-color:#fff;color:#176ae5;font-size:11px;font-weight:600;line-height:1}.main-page{--app-font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";--el-font-family: var(--app-font-family);z-index:100003;position:fixed;color:#1f2329;font-family:var(--app-font-family)!important;font-size:14px;line-height:1.5715;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}.main-page *,.main-page input,.main-page button,.main-page textarea{font-family:var(--app-font-family)!important;letter-spacing:0}.main-page .el-card,.main-page .el-tabs,.main-page .el-text,.main-page .el-button,.main-page .el-input,.main-page .el-input__inner,.main-page .el-input-number,.main-page .el-table{font-family:var(--app-font-family)!important}.main-page .overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1001}.main-page .el-card{border:0}.main-page .card-header{display:flex;justify-content:space-between;flex-direction:row;align-items:center;margin:0;padding:0;cursor:move}.main-page .card-header .title{font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:500}.main-page .warning-icon{margin-left:5px}.main-page .zoom-icon{cursor:pointer}.main-page .zoom-icon.is-spaced{margin-left:8px}.main-page .minus{margin:5px 10px -10px 0}.main-page .compact-divider{margin:0}.main-page .demo-tabs{display:initial}.main-page .el-card__header{background-color:#1f71e0;color:#fff;padding:7px 10px 7px 16px;margin:0}.main-page .el-card__body{padding:0 16px 20px}.main-page .el-tabs__nav-wrap:after{height:1px}.main-page .el-tabs__active-bar{background-color:#176ae5}.main-page .el-tabs__item{font-size:13px;height:34px}.main-page .el-tabs__item.is-top{font-weight:400;color:#4e5969;padding:0 8px 0 12px}.main-page .el-tabs__item.is-active{font-weight:500;color:#176ae5;padding:0 8px 0 12px}.main-page .script-home{padding-top:2px}.main-page .announcement-board{box-sizing:border-box;margin:2px 0 10px;padding:8px 10px;border:1px solid #bae0ff;border-radius:6px;background-color:#e6f4ff}.main-page .announcement-heading{display:flex;align-items:center;gap:6px;margin-bottom:4px;color:#0958d9;font-size:12px;font-weight:600;line-height:20px}.main-page .announcement-heading:before{content:"";width:6px;height:6px;flex:0 0 auto;border-radius:50%;background-color:#1677ff}.main-page .announcement-list{display:grid;gap:3px;margin:0;padding:0;list-style:none}.main-page .announcement-item{color:#1f2329;font-size:12px;line-height:20px;word-break:break-word}.main-page .log .el-text{font-weight:400;white-space:normal}.main-page .log-time{font-weight:400}.main-page .log-action-link{color:#176ae5;cursor:pointer;text-decoration:none}.main-page .log-action-link:hover{color:#409eff;text-decoration:underline}.main-page .log-divider{margin:0}.main-page .token-input,.main-page .question-list{font-size:12px}.main-page .token-label{border-radius:0}.main-page .question_table{width:625px}.main-page .answer-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 2px 8px;font-size:11px;line-height:18px}.main-page .answer-legend>span{display:inline-flex;align-items:center;gap:5px}.main-page .answer-legend>span:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.main-page .answer-result{line-height:1.7;overflow-wrap:anywhere}.main-page .answer-result--success{color:#15803d}.main-page .answer-result--searching{color:#a15c08}.main-page .answer-result--pending{color:#697586}.main-page .answer-result--error{color:#c73e38}.main-page .setting{margin-top:-8px;font-size:14px}.main-page .setting-section-title{font-size:13px}.main-page .setting-checkbox{margin-bottom:6px}.main-page .setting-number{margin-top:6px}.main-page .setting .el-form-item{margin-bottom:0}\n';
+  const layoutCss = '.main-page .guide-page{box-sizing:border-box;max-height:min(400px,calc(100vh - 160px));max-height:min(400px,calc(100dvh - 160px));overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 0;color:#4e5969;font-size:12px;line-height:1.7;scrollbar-width:thin;scrollbar-color:#c7d7eb transparent}.main-page .guide-page:focus-visible{outline:2px solid #176ae5;outline-offset:2px;border-radius:8px}.main-page .guide-header{margin:0 0 10px;padding:11px 12px;border:1px solid #d9e8fc;border-radius:9px;background:linear-gradient(120deg,#edf5ff 0%,#f8fbff 100%)}.main-page .guide-heading-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.main-page .guide-title{margin:0;color:#174b94;font-size:13px;font-weight:600;line-height:1.6}.main-page .guide-tag{flex-shrink:0;padding:1px 7px;border:1px solid #d4e5fc;border-radius:20px;background-color:#fff;color:#2262b5;font-size:10px;line-height:18px}.main-page .guide-subtitle{margin:3px 0 0;color:#61758e;font-size:11px}.main-page .guide-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.main-page .guide-card{min-width:0;padding:10px;border:1px solid #e4eaf2;border-radius:8px;background-color:#fff}.main-page .guide-card-heading{display:flex;align-items:center;gap:8px;margin-bottom:6px}.main-page .guide-number{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;height:24px;border-radius:7px;background-color:#eaf3ff;color:#176ae5;font-size:11px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}.main-page .guide-card-title{margin:0;color:#263a55;font-size:12px;font-weight:600;line-height:1.6}.main-page .guide-copy{margin:0;overflow-wrap:anywhere}.main-page .guide-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:10px 0 0;padding:9px 4px 7px;border-radius:7px;background-color:#f3f7fd;list-style:none}.main-page .guide-flow-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;color:#3a5a83;font-size:10px;line-height:18px;text-align:center}.main-page .guide-flow-step+.guide-flow-step:before{position:absolute;top:8px;left:-5px;width:5px;height:5px;border-top:1px solid #9cb8da;border-right:1px solid #9cb8da;content:"";transform:rotate(45deg)}.main-page .guide-flow-number{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #d5e4f8;border-radius:50%;background-color:#fff;color:#176ae5;font-size:11px;font-weight:600;line-height:1}.main-page{--app-font-family:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";z-index:100003;position:fixed;color:#1f2329;font-family:var(--app-font-family)!important;font-size:14px;line-height:1.5715;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}.main-page *,.main-page input,.main-page button,.main-page textarea,.main-page select,.main-page table,.main-page th,.main-page td{font-family:var(--app-font-family)!important;box-sizing:border-box;letter-spacing:0}.main-page .overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1001}.main-page .mp-card{border:1px solid #e4e7ed;border-radius:10px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);overflow:hidden}.main-page .mp-header{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#1f71e0;color:#fff;padding:8px 12px;cursor:move}.main-page .mp-title{font-size:14px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.main-page .mp-header .warning-icon{margin-left:6px;cursor:help;display:inline-flex;align-items:center}.main-page .mp-body{padding:0 14px 18px}.main-page .mp-tabs{display:flex;gap:2px;border-bottom:1px solid #e4e7ed;padding:6px 14px 0;background:#fafbfc}.main-page .mp-tab{appearance:none;border:0;background:transparent;padding:6px 12px;font-size:13px;color:#4e5969;cursor:pointer;border-radius:6px 6px 0 0}.main-page .mp-tab:hover{background:#eef3fb;color:#176ae5}.main-page .mp-tab.active{color:#176ae5;font-weight:600;background:#eaf2ff;box-shadow:inset 0 -2px 0 #176ae5}.main-page .mp-divider{height:1px;background:#e4e7ed;margin:10px 0}.main-page .mp-section-title{font-size:13px;font-weight:600;color:#263a55;margin:8px 0 6px}.main-page .mp-checkbox{display:flex;align-items:center;gap:6px;font-size:13px;margin:6px 0;cursor:pointer}.main-page .mp-checkbox input{width:15px;height:15px;cursor:pointer}.main-page .mp-field{display:grid;grid-template-columns:48px 1fr;align-items:center;gap:8px;margin:6px 0}.main-page .mp-label{font-size:12px;color:#4e5969;white-space:nowrap}.main-page .mp-input,.main-page .mp-select,.main-page .mp-textarea{width:100%;padding:5px 8px;font-size:12px;color:#303133;border:1px solid #dcdfe6;border-radius:4px;background:#fff;box-sizing:border-box}.main-page .mp-select{cursor:pointer}.main-page .mp-textarea{resize:vertical;min-height:34px;font-family:var(--app-font-family)!important}.main-page .mp-btn{appearance:none;border:1px solid #dcdfe6;background:#fff;color:#303133;padding:5px 12px;border-radius:4px;font-size:12px;cursor:pointer}.main-page .mp-btn:hover{border-color:#c6e2ff;color:#176ae5}.main-page .mp-btn.primary{background:#409eff;border-color:#409eff;color:#fff}.main-page .mp-btn.primary:hover{background:#66b1ff;border-color:#66b1ff}.main-page .mp-btn:disabled{opacity:.6;cursor:not-allowed}.main-page .mp-log-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.main-page .mp-log-title{font-size:13px;font-weight:600;color:#263a55}.main-page .mp-log{max-height:230px;overflow-x:hidden;overflow-y:auto;padding:2px 4px 2px 0;scrollbar-width:thin;scrollbar-color:#c7d7eb transparent}.main-page .mp-log-item{display:flex;gap:6px;align-items:flex-start;padding:3px 0;border-bottom:1px dashed #eef0f3}.main-page .mp-log-time{color:#86909c;font-size:11px;white-space:nowrap;flex-shrink:0}.main-page .mp-log{flex:1;line-height:1.6;font-size:12px;overflow-wrap:anywhere}.main-page .mp-log.primary{color:#1f2329}.main-page .mp-log.success{color:#15803d}.main-page .mp-log.warning{color:#a15c08}.main-page .mp-log.error{color:#c73e38}.main-page .mp-log.info{color:#697586}.main-page .mp-q-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}.main-page .mp-q-table th,.main-page .mp-q-table td{border:1px solid #e4e7ed;padding:5px 6px;text-align:left;vertical-align:top;word-break:break-word}.main-page .mp-q-table th{background:#f5f7fa;font-weight:600;color:#263a55}.main-page .mp-q-table td:first-child{width:28px;color:#86909c;text-align:center}.main-page .mp-empty{padding:24px;text-align:center;color:#86909c;font-size:13px}.main-page .mp-minhint{font-size:12px;color:#86909c;padding:6px 0}.main-page .zoom-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;cursor:pointer;color:#fff;font-size:15px}.main-page .zoom-icon:hover{opacity:.85}.main-page .zoom-icon.is-spaced{margin-left:8px}.main-page .answer-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:8px 2px;font-size:11px;line-height:18px}.main-page .answer-legend>span{display:inline-flex;align-items:center;gap:5px}.main-page .answer-legend>span:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.main-page .answer-result{line-height:1.7;overflow-wrap:anywhere}.main-page .answer-result--success{color:#15803d}.main-page .answer-result--searching{color:#a15c08}.main-page .answer-result--pending{color:#697586}.main-page .answer-result--error{color:#c73e38}';
   const BOOTSTRAP_INTERVAL = 100;
   const COMPLETE_READY_STATE = "complete";
-  const ELEMENT_PLUS_STYLE_RESOURCE = "ElementPlusStyle";
   const createStyleSheet = (cssText) => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(cssText);
@@ -7274,7 +7118,6 @@
     document.body.append(shadowHost);
     shadowRoot.appendChild(mountNode);
     shadowRoot.adoptedStyleSheets = [
-      createStyleSheet(_GM_getResourceText(ELEMENT_PLUS_STYLE_RESOURCE) ?? ""),
       createStyleSheet(layoutCss)
     ];
     return mountNode;
@@ -7282,11 +7125,10 @@
   const mountApp = () => {
     const app = vue.createApp(_sfc_main);
     app.use(pinia.createPinia());
-    app.use(ElementPlus);
     app.mount(createShadowMountNode());
   };
-  // 轻量悬浮启动按钮（原生 DOM，绝不触碰 ElementPlus / Vue）：页面加载即创建，点击才挂载重面板。
-  // 这样无论哪个 chaoxing 子域（i / v8 / v1 / manage …）打开瞬间都不会被 app.use(ElementPlus) 卡住。
+  // 轻量悬浮启动按钮（原生 DOM，绝不触碰 Vue 面板）：页面加载即创建，点击才挂载重面板。
+  // 这样无论哪个 chaoxing 子域（i / v8 / v1 / manage …）打开瞬间都不会被面板挂载卡住。
   const LAUNCHER_ID = "cx-ai-launcher";
   let panelMounted = false;
   const mountPanelOnce = () => {
@@ -7347,4 +7189,4 @@
     }
   }, BOOTSTRAP_INTERVAL);
 
-})(Vue, Pinia, rxjs, md5, ElementPlus);
+})(Vue, Pinia, rxjs, md5);
