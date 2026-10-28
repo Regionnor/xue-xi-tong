@@ -8,6 +8,17 @@
 
 ---
 
+## [1.21] - 2026-10-28
+
+### 🛠 修复 (Fixed) - 2026-10-28
+- **根本性解决「任意 chaoxing 子域打开就卡」**：此前几版用「黑名单逐个跳过挂载」的方式（跳过 `/manage`、登录页、`vN` 门户首页），但用户又遇到 `i.chaoxing.com/base?t=...` 等新页面卡顿——本质原因是只要页面加载即同步执行 `app.use(ElementPlus)` + 往 shadow DOM 注入大段 EP 样式（在重 DOM 上耗时数秒），且超星子域层出不穷，黑名单永远补不完。
+  - **改为「按需挂载」架构**：页面加载时只创建一个**极轻量的原生 DOM 悬浮启动按钮**（右下角蓝色「AI」圆钮，纯 `document.createElement`，不触碰 Vue / ElementPlus）；只有用户**点击该按钮**时才用 `requestIdleCallback` 创建完整 Vue + ElementPlus 面板。
+  - 这样**任何** `i.` / `v8` / `v1` / `manage` / 任意子域，打开瞬间都不会被面板初始化阻塞，彻底告别卡顿；需要面板时点一下即可，功能完全不变。
+  - 配套：面板挂载后默认可见（`layout` 的 `isShow` 初值改 `true`），并在 `_sfc_main$3` 未匹配到具体任务页时不再自动隐藏面板（因面板现由用户显式展开）。
+  - 移除此前的 `shouldSkipMount` 黑名单与自动挂载 `timer`，改用 `createLauncher` + `mountPanelOnce`（防重复挂载）。
+
+---
+
 ## [1.20] - 2026-10-28
 
 ### 🛠 修复 (Fixed) - 2026-10-28

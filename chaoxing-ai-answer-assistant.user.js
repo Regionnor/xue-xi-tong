@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.20
+// @version      1.21
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6980,7 +6980,7 @@
           updateVisible(true);
           return;
         }
-        updateVisible(false);
+        // 未匹配到具体任务页时不再自动隐藏面板（面板现由用户点击启动按钮显式展开，保持可见即可）
       };
       executeLogicByUrl(url2);
       const tabs = vue.computed(() => [
@@ -7092,7 +7092,7 @@
   const _sfc_main$1 = /* @__PURE__ */ vue.defineComponent({
     __name: "layout",
     setup(__props) {
-      const isShow = vue.ref(false);
+      const isShow = vue.ref(true);
       const configStore = useConfigStore();
       const currentPlatformName = vue.computed(() => configStore.platformParams[configStore.platformName].name);
       vue.watch(configStore, (newVal) => {
@@ -7285,43 +7285,66 @@
     app.use(ElementPlus);
     app.mount(createShadowMountNode());
   };
-  const shouldSkipMount = () => {
-    let url;
-    try {
-      url = new URL(window.location.href);
-    } catch (e) {
-      return false;
-    }
-    const href = (url.href || "").toLowerCase();
-    const path = (url.pathname || "").toLowerCase();
-    // 教师后台（含 /manage?ws= 这种无尾斜杠形式）/ 登录 / 鉴权等脚本用不到的页面，跳过挂载
-    if (path.startsWith("/manage"))
-      return true;
-    if (href.includes("passport") || href.includes("login") || path.startsWith("/auth/"))
-      return true;
-    // 各类门户 / 首页（vN.chaoxing.com 根路径等），脚本用不到面板，跳过挂载以杜绝卡顿
-    const host = url.hostname;
-    if (/^v\d+\.chaoxing\.com$/.test(host)) {
-      if (path === "/" || path === "" || path === "/home" || path === "/index")
-        return true;
-    }
-    return false;
-  };
-  const timer = setInterval(() => {
-    if (document.readyState !== COMPLETE_READY_STATE)
+  // 轻量悬浮启动按钮（原生 DOM，绝不触碰 ElementPlus / Vue）：页面加载即创建，点击才挂载重面板。
+  // 这样无论哪个 chaoxing 子域（i / v8 / v1 / manage …）打开瞬间都不会被 app.use(ElementPlus) 卡住。
+  const LAUNCHER_ID = "cx-ai-launcher";
+  let panelMounted = false;
+  const mountPanelOnce = () => {
+    if (panelMounted)
       return;
-    clearInterval(timer);
-    if (shouldSkipMount())
-      return;
-    // 延迟到浏览器空闲时再挂载面板，确保首屏立即可交互，不被脚本初始化阻塞
-    const defer = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+    panelMounted = true;
+    const defer = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
     defer(() => {
       try {
         mountApp();
+        const btn = document.getElementById(LAUNCHER_ID);
+        if (btn)
+          btn.style.display = "none";
       } catch (e) {
         console.error("[学习通AI助手] 面板挂载失败：", e);
+        panelMounted = false;
       }
     });
+  };
+  const createLauncher = () => {
+    if (document.getElementById(LAUNCHER_ID))
+      return;
+    const btn = document.createElement("div");
+    btn.id = LAUNCHER_ID;
+    btn.textContent = "AI";
+    btn.title = "点击展开 学习通AI答题助手";
+    btn.style.cssText = [
+      "position:fixed",
+      "right:14px",
+      "bottom:80px",
+      "z-index:2147483647",
+      "width:40px",
+      "height:40px",
+      "border-radius:50%",
+      "background:#409eff",
+      "color:#fff",
+      "font-size:14px",
+      "font-weight:700",
+      "line-height:40px",
+      "text-align:center",
+      "cursor:pointer",
+      "box-shadow:0 2px 8px rgba(0,0,0,.25)",
+      "user-select:none"
+    ].join(";");
+    btn.addEventListener("click", mountPanelOnce);
+    document.body.appendChild(btn);
+  };
+  const bootstrapLauncher = setInterval(() => {
+    if (document.readyState !== COMPLETE_READY_STATE)
+      return;
+    if (!document.body)
+      return;
+    clearInterval(bootstrapLauncher);
+    try {
+      createLauncher();
+    } catch (e) {
+      console.error("[学习通AI助手] 启动按钮创建失败：", e);
+    }
   }, BOOTSTRAP_INTERVAL);
 
 })(Vue, Pinia, rxjs, md5, ElementPlus);
