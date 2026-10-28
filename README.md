@@ -4,6 +4,8 @@
 
 本脚本是一款运行在**超星学习通**网页上的用户脚本（Userscript），最大特色是**接入任意 OpenAI 兼容 AI 接口**来完成答题，不再依赖任何第三方题库。
 
+> 在线说明文档：<https://regionnor.github.io/xue-xi-tong/>
+
 ---
 
 ## ✨ 特性
