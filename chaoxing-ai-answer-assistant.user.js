@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.25
+// @version      1.26
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1043,7 +1043,7 @@
                   vue.createElementVNode("span", {
                     class: "mp-log " + (item.type || "primary"),
                     innerHTML: item.message
-                  }, null, 8, ["innerHTML"])
+                  }, null, 10, ["innerHTML"])
                 ]);
               }), 128))
           ])
@@ -6941,7 +6941,7 @@
                 key: tab.name,
                 class: vue.normalizeClass(["mp-tab", { active: vue.unref(configStore).menuIndex === tab.name }]),
                 onClick: ($event) => vue.unref(configStore).menuIndex = tab.name
-              }, vue.toDisplayString(tab.label), 9, ["onClick"]);
+              }, vue.toDisplayString(tab.label), 10, ["onClick"]);
             }), 128))
           ]),
           activeTab ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(activeTab.component), vue.mergeProps({ ref_for: true }, activeTab.props), null, 16)) : vue.createCommentVNode("v-if", true)
