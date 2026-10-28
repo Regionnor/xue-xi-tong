@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.17
+// @version      1.18
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7285,11 +7285,30 @@
     app.use(ElementPlus);
     app.mount(createShadowMountNode());
   };
+  const shouldSkipMount = () => {
+    const href = (window.location.href || "").toLowerCase();
+    // 教师后台 / 登录页等脚本无法使用的页面，跳过挂载，避免在这些页面卡顿
+    if (href.includes("/manage/"))
+      return true;
+    if (href.includes("passport") || href.includes("login") || href.includes("/auth/"))
+      return true;
+    return false;
+  };
   const timer = setInterval(() => {
     if (document.readyState !== COMPLETE_READY_STATE)
       return;
     clearInterval(timer);
-    mountApp();
+    if (shouldSkipMount())
+      return;
+    // 延迟到浏览器空闲时再挂载面板，确保首屏立即可交互，不被脚本初始化阻塞
+    const defer = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+    defer(() => {
+      try {
+        mountApp();
+      } catch (e) {
+        console.error("[学习通AI助手] 面板挂载失败：", e);
+      }
+    });
   }, BOOTSTRAP_INTERVAL);
 
 })(Vue, Pinia, rxjs, md5, ElementPlus);
