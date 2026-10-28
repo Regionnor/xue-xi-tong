@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.15
+// @version      1.16
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7037,7 +7037,7 @@
                   label: tab.label
                 }, {
                   default: vue.withCtx(() => [
-                    (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(tab.component), vue.mergeProps({ ref_for: true }, tab.props), null, 16))
+                    vue.unref(configStore).menuIndex === tab.name ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(tab.component), vue.mergeProps({ ref_for: true }, tab.props), null, 16)) : null
                   ]),
                   _: 2
                 }, 1032, ["name", "label"]);
