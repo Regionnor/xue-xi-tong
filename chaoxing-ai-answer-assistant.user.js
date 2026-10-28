@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.22
+// @version      1.23
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1041,10 +1041,9 @@
                 return vue.openBlock(), vue.createElementBlock("div", { key: index, class: "mp-log-item" }, [
                   vue.createElementVNode("span", { class: "mp-log-time" }, vue.toDisplayString(item.time), 1),
                   vue.createElementVNode("span", {
-                    class: "mp-log " + (item.type || "primary")
-                  }, {
+                    class: "mp-log " + (item.type || "primary"),
                     innerHTML: item.message
-                  }, 8, ["innerHTML"])
+                  }, null, 8, ["innerHTML"])
                 ]);
               }), 128))
           ])
@@ -1295,7 +1294,7 @@
           }, vue.unref(testLoading) ? "测试中…" : "测试连接"),
           vue.unref(testResult) ? vue.createElementVNode("span", {
             style: { color: vue.unref(testResult).ok ? "#67c23a" : "#f56c6c", fontSize: "12px" }
-          }, vue.toDisplayString(vue.unref(testResult).msg), 1) : null,
+          }, vue.toDisplayString(vue.unref(testResult).msg), 1) : vue.createCommentVNode("v-if", true),
           vue.withDirectives(vue.createElementVNode("div", _hoisted_1$3, [
             _hoisted_2$3,
             vue.createElementVNode("table", { class: "mp-q-table" }, [
@@ -6934,7 +6933,7 @@
               }, vue.toDisplayString(tab.label), 9, ["onClick"]);
             }), 128))
           ]),
-          activeTab ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(activeTab.component), vue.mergeProps({ ref_for: true }, activeTab.props), null, 16)) : null
+          activeTab ? (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(activeTab.component), vue.mergeProps({ ref_for: true }, activeTab.props), null, 16)) : vue.createCommentVNode("v-if", true)
         ], 4);
       };
     }
@@ -7145,6 +7144,14 @@
       } catch (e) {
         console.error("[学习通AI助手] 面板挂载失败：", e);
         panelMounted = false;
+        try {
+          var errBox = document.createElement("div");
+          errBox.textContent = "AI 面板加载失败：" + (e && e.message ? e.message : e);
+          errBox.style.cssText = "position:fixed;left:12px;bottom:12px;z-index:2147483647;max-width:320px;padding:8px 12px;border-radius:8px;background:#fef0f0;color:#c73e38;font-size:12px;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.2)";
+          setTimeout(function () { try { errBox.remove(); } catch (_) { } }, 8e3);
+          document.body.appendChild(errBox);
+        } catch (_) {
+        }
       }
     });
   };
