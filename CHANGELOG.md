@@ -8,6 +8,13 @@
 
 ---
 
+## [1.14] - 2026-10-28
+
+### 🔧 修正 (Fixed) - 2026-10-28
+- **修正小米 MiMo 预设端点**：将预设「小米 MiMo」的接口地址由社区流传值 `https://api.miwifi.com/v1` 更正为官方 OpenAI 兼容地址 `https://api.xiaomimimo.com/v1`（官方同时提供 Anthropic 兼容路径 `https://api.xiaomimimo.com/anthropic`，本预设采用 OpenAI 兼容）。API Key 格式为 `sk-xxxxx`（于官方 API Keys 页面创建）。现已移除「端点请核实」提示。模型字段仍留空，由用户按账户实际可用模型填写。
+
+---
+
 ## [1.13] - 2026-10-28
 
 ### 🔧 调整 (Changed) - 2026-10-28

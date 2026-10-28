@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.13
+// @version      1.14
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1203,7 +1203,7 @@
         { label: "通义千问 (Qwen)", value: "qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "" },
         { label: "豆包 (火山方舟)", value: "doubao", baseUrl: "https://ark.cn-beijing.volces.com/api/v3", model: "" },
         { label: "Kimi (月之暗面)", value: "kimi", baseUrl: "https://api.moonshot.cn/v1", model: "" },
-        { label: "小米 MiMo（端点请核实）", value: "mimo", baseUrl: "https://api.miwifi.com/v1", model: "" },
+        { label: "小米 MiMo", value: "mimo", baseUrl: "https://api.xiaomimimo.com/v1", model: "" },
         { label: "空白（自定义）", value: "custom", baseUrl: "", model: "" }
       ];
       const currentPreset = vue.ref("openai");
