@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.14
+// @version      1.15
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1287,8 +1287,6 @@
         const _component_el_table_column = vue.resolveComponent("el-table-column");
         const _component_el_table = vue.resolveComponent("el-table");
         const _component_el_empty = vue.resolveComponent("el-empty");
-        const _component_el_select = vue.resolveComponent("el-select");
-        const _component_el_option = vue.resolveComponent("el-option");
         const _component_el_button = vue.resolveComponent("el-button");
         return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
           vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
@@ -1304,20 +1302,15 @@
             label: "启用 AI 接口答题",
             size: "small"
           }, null, 8, ["modelValue", "onUpdate:modelValue", "label"]),
-          vue.createVNode(_component_el_select, {
-            modelValue: vue.unref(currentPreset),
-            "onUpdate:modelValue": applyPreset,
-            placeholder: "选择预设接口源",
-            size: "small",
-            style: { width: "100%", marginBottom: "6px" }
-          }, {
-            default: vue.withCtx(() => [
-              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, (p) => {
-                return vue.openBlock(), vue.createBlock(_component_el_option, { key: p.value, label: p.label, value: p.value }, null, 8, ["label", "value"]);
-              }), 256))
-            ]),
-            _: 1
-          }),
+          vue.createElementVNode("select", {
+            value: vue.unref(currentPreset),
+            onChange: ($event) => applyPreset($event.target.value),
+            style: { width: "100%", marginBottom: "6px", padding: "4px 6px", fontSize: "12px", boxSizing: "border-box", borderRadius: "4px", border: "1px solid #dcdfe6", background: "#fff", color: "#303133" }
+          }, [
+            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, (p) => {
+              return vue.openBlock(), vue.createVNode("option", { key: p.value, value: p.value }, vue.toDisplayString(p.label), 9, ["value"]);
+            }), 256))
+          ]),
           vue.createVNode(_component_el_input, {
             class: "token-input",
             modelValue: vue.unref(configStore).aiConfig.baseUrl,

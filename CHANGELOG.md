@@ -8,6 +8,16 @@
 
 ---
 
+## [1.15] - 2026-10-28
+
+### 🛠 修复 (Fixed) - 2026-10-28
+- **修复安装 v1.12+ 后「答题」设置页卡死、CPU 飙高（风扇狂转）**：v1.12 新增的 AI 预设下拉使用了 Element Plus 的 `el-select`。该组件内部依赖 **teleport + popper 弹层 + ResizeObserver 尺寸测量**，而整个面板挂载在 **closed shadow DOM** 内、Element Plus 样式无法穿透，导致 `el-select` 的尺寸测量失稳、触发 **ResizeObserver 死循环**，表现为页面卡死、CPU 占满。
+  - 改为使用 **原生 `<select>` + `<option>`**（内联样式，在 shadow DOM 内始终生效，无 teleport/popper/ResizeObserver 负担），与之前把 `el-scrollbar` 换成原生 `<div>` 是同一思路。
+  - 「测试连接」按钮继续沿用安全的 `el-button`（自 v1.11 导出按钮起已在 shadow DOM 内稳定使用），未改动。
+  - 若此前在 1.12~1.14 上遇到卡死，升级到 1.15 后应恢复正常。
+
+---
+
 ## [1.14] - 2026-10-28
 
 ### 🔧 修正 (Fixed) - 2026-10-28
