@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.16
+// @version      1.17
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1287,7 +1287,6 @@
         const _component_el_table_column = vue.resolveComponent("el-table-column");
         const _component_el_table = vue.resolveComponent("el-table");
         const _component_el_empty = vue.resolveComponent("el-empty");
-        const _component_el_button = vue.resolveComponent("el-button");
         return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
           vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
             default: vue.withCtx(() => [
@@ -1358,15 +1357,12 @@
               vue.createElementVNode("span", null, "要求")
             ])
           }, 8, ["modelValue", "type"]),
-          vue.createVNode(_component_el_button, {
-            size: "small",
-            type: "primary",
-            loading: vue.unref(testLoading),
+          vue.createElementVNode("button", {
+            type: "button",
             onClick: testConnection,
-            style: { marginRight: "8px" }
-          }, {
-            default: vue.withCtx(() => ["测试连接"])
-          }, 8, ["loading"]),
+            disabled: vue.unref(testLoading),
+            style: { marginRight: "8px", padding: "4px 10px", fontSize: "12px", cursor: "pointer", borderRadius: "4px", border: "1px solid #409eff", background: vue.unref(testLoading) ? "#a0cfff" : "#409eff", color: "#fff" }
+          }, vue.unref(testLoading) ? "测试中…" : "测试连接"),
           vue.unref(testResult) ? vue.createVNode("span", {
             style: { color: vue.unref(testResult).ok ? "#67c23a" : "#f56c6c", fontSize: "12px" }
           }, vue.toDisplayString(vue.unref(testResult).msg), 1) : null,
