@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>学习通AI答题小助手（Region改良款）· 说明文档</title>
+<meta name="description" content="学习通AI答题小助手（Region改良款）说明文档：安装、AI 接口配置、面板使用、常见问题与版本记录。" />
+<style>
+  :root {
+    --bg: #f5f8fc;
+    --panel: #ffffff;
+    --ink: #16202c;
+    --ink-2: #33455c;
+    --muted: #64748b;
+    --brand: #1f71e0;
+    --brand-dark: #176ae5;
+    --brand-soft: #eaf2ff;
+    --line: #e2e9f3;
+    --code-bg: #0f1a2b;
+    --ok: #15803d;
+    --warn: #b45309;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(16, 32, 56, .04), 0 8px 24px rgba(16, 32, 56, .06);
+    --shadow-hover: 0 2px 6px rgba(16, 32, 56, .06), 0 16px 36px rgba(16, 32, 56, .1);
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Roboto, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--brand-dark); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: #eef3fa;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: .1em .4em;
+    color: #1c3a63;
+    word-break: break-all;
+  }
+
+  /* ---------- top nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255, 255, 255, .86);
+    backdrop-filter: saturate(1.6) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1040px; margin: 0 auto; padding: 0 20px;
+    height: 60px; display: flex; align-items: center; gap: 18px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .brand:hover { text-decoration: none; }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--brand), #4f9bff);
+    color: #fff; font-size: 13px; font-weight: 800;
+    display: grid; place-items: center;
+    box-shadow: 0 2px 6px rgba(31, 113, 224, .35);
+  }
+  .nav-links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-left: auto; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    color: var(--ink-2); font-size: 13.5px; padding: 6px 11px; border-radius: 8px; white-space: nowrap;
+    transition: background .15s, color .15s;
+  }
+  .nav-links a:hover { background: var(--brand-soft); color: var(--brand-dark); text-decoration: none; }
+  .nav-links a.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
+
+  /* ---------- layout ---------- */
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 46px 0 6px; }
+  section + section { border-top: 1px solid var(--line); }
+  h2 {
+    font-size: 22px; letter-spacing: -.2px; margin: 0 0 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .ic {
+    width: 26px; height: 26px; border-radius: 8px; background: var(--brand-soft);
+    color: var(--brand-dark); display: grid; place-items: center; flex: none;
+  }
+  h2 .ic svg { width: 15px; height: 15px; }
+  .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 22px; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    background: radial-gradient(1200px 380px at 12% -10%, #2f86f6 0%, transparent 60%),
+                linear-gradient(135deg, #1a63c9 0%, #1f71e0 45%, #3f92f3 100%);
+    color: #fff; padding: 54px 0 46px; position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
+    background-size: 22px 22px; opacity: .5; pointer-events: none;
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero h1 { font-size: 32px; line-height: 1.3; margin: 0 0 10px; letter-spacing: -.5px; }
+  .hero p.lead { margin: 0 0 20px; color: rgba(255,255,255,.9); max-width: 720px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .badge {
+    font-size: 12px; padding: 3px 10px; border-radius: 999px;
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); color: #fff;
+  }
+  .badge.solid { background: #fff; color: var(--brand-dark); border-color: #fff; font-weight: 700; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    border: 1px solid transparent; cursor: pointer; transition: transform .12s, box-shadow .2s, background .2s;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); }
+  .btn-primary { background: #fff; color: var(--brand-dark); box-shadow: 0 6px 18px rgba(9, 40, 90, .22); }
+  .btn-primary:hover { background: #f2f7ff; }
+  .btn-ghost { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.4); }
+  .btn-ghost:hover { background: rgba(255,255,255,.2); }
+  .btn svg { width: 15px; height: 15px; }
+
+  /* ---------- cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow); transition: transform .16s, box-shadow .2s, border-color .2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: #cfe0f7; }
+  .card h3 { margin: 0 0 6px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .card h3 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); flex: none; }
+  .card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.7; }
+
+  /* ---------- steps ---------- */
+  .steps { counter-reset: step; display: grid; gap: 12px; }
+  .step {
+    display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    width: 28px; height: 28px; border-radius: 9px; background: var(--brand-soft); color: var(--brand-dark);
+    font-weight: 700; font-size: 13px; display: grid; place-items: center; margin-top: 2px;
+  }
+  .step h4 { margin: 0 0 4px; font-size: 14.5px; }
+  .step p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .step p + p { margin-top: 6px; }
+
+  /* ---------- code ---------- */
+  .codebox {
+    position: relative; background: var(--code-bg); border-radius: 10px;
+    padding: 13px 46px 13px 15px; margin: 10px 0 0; overflow: hidden;
+  }
+  .codebox code {
+    background: none; border: 0; padding: 0; color: #b9d4ff;
+    font-size: 12.5px; line-height: 1.6; display: block; word-break: break-all;
+  }
+  .copy {
+    position: absolute; top: 9px; right: 9px; width: 30px; height: 30px;
+    border-radius: 7px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08);
+    color: #cfe1ff; cursor: pointer; display: grid; place-items: center;
+  }
+  .copy:hover { background: rgba(255,255,255,.18); }
+  .copy svg { width: 14px; height: 14px; }
+
+  /* ---------- table ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f3f7fd; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #fafcff; }
+  td code { font-size: 12px; }
+
+  /* ---------- faq ---------- */
+  details {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 0 16px; margin-bottom: 10px; transition: border-color .2s, box-shadow .2s;
+  }
+  details[open] { border-color: #cfe0f7; box-shadow: var(--shadow); }
+  summary {
+    cursor: pointer; list-style: none; padding: 13px 0; font-weight: 600; font-size: 14.5px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: "+"; width: 20px; height: 20px; border-radius: 6px; background: var(--brand-soft);
+    color: var(--brand-dark); font-weight: 700; display: grid; place-items: center; flex: none; font-size: 14px;
+  }
+  details[open] summary::before { content: "−"; }
+  details .ans { padding: 0 0 14px 30px; color: var(--muted); font-size: 13.5px; }
+  details .ans p { margin: 0 0 8px; }
+  details .ans p:last-child { margin-bottom: 0; }
+  details .ans ul { margin: 6px 0 0; padding-left: 18px; }
+
+  /* ---------- timeline ---------- */
+  .timeline { position: relative; margin: 4px 0 0; padding-left: 26px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px;
+    background: linear-gradient(#cfe0f7, #e8eef8);
+  }
+  .tl-item { position: relative; padding: 0 0 18px; }
+  .tl-item::before {
+    content: ""; position: absolute; left: -24px; top: 7px; width: 10px; height: 10px;
+    border-radius: 50%; background: #fff; border: 2px solid var(--brand);
+  }
+  .tl-item.key::before { background: var(--brand); box-shadow: 0 0 0 4px rgba(31,113,224,.12); }
+  .tl-ver { font-family: var(--mono); font-size: 12px; color: var(--brand-dark); font-weight: 700; }
+  .tl-item p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+
+  /* ---------- misc ---------- */
+  .note {
+    border-left: 3px solid var(--brand); background: var(--brand-soft);
+    border-radius: 0 10px 10px 0; padding: 11px 15px; font-size: 13.5px; color: #1c3a63; margin: 14px 0 0;
+  }
+  .note.warn { border-left-color: #d97706; background: #fff8ec; color: #7c4a09; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .chip {
+    font-size: 12.5px; padding: 3px 10px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line); color: var(--ink-2);
+  }
+  footer {
+    margin-top: 48px; padding: 26px 0 40px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px; text-align: center;
+  }
+  footer .links { margin-bottom: 8px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .top {
+    position: fixed; right: 18px; bottom: 18px; width: 38px; height: 38px; border-radius: 10px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--ink-2);
+    display: grid; place-items: center; box-shadow: var(--shadow); cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 40;
+  }
+  .top.show { opacity: 1; pointer-events: auto; }
+  .top:hover { transform: translateY(-2px); }
+
+  @media (max-width: 640px) {
+    .hero { padding: 40px 0 34px; }
+    .hero h1 { font-size: 25px; }
+    .nav-inner { height: 54px; gap: 10px; }
+    .nav-links a { font-size: 12.5px; padding: 5px 8px; }
+    section { padding: 36px 0 4px; }
+    h2 { font-size: 19px; }
+    details .ans { padding-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top"><span class="brand-mark">AI</span><span>学习通AI答题小助手</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="#about">简介</a>
+      <a href="#features">特性</a>
+      <a href="#install">安装</a>
+      <a href="#config">配置</a>
+      <a href="#usage">使用</a>
+      <a href="#domains">域名</a>
+      <a href="#faq">常见问题</a>
+      <a href="#changelog">版本</a>
+      <a href="#disclaimer">声明</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="badges">
+      <span class="badge solid">v1.27</span>
+      <span class="badge">用户脚本 / Userscript</span>
+      <span class="badge">MIT License</span>
+      <span class="badge">仅超星学习通</span>
+    </div>
+    <h1>学习通AI答题小助手（Region改良款）</h1>
+    <p class="lead">
+      运行在超星学习通网页上的用户脚本。最大特色是接入<strong>任意 OpenAI 兼容的 AI 接口</strong>来完成答题，
+      不依赖任何第三方题库；同时保留视频自动播放、文档自动阅读、章节测试 / 作业 / 考试自动完成等能力。
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        安装脚本（最新版）
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/Regionnor/xue-xi-tong" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.89-2.78.62-3.37-1.2-3.37-1.2-.45-1.18-1.11-1.49-1.11-1.49-.91-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+        GitHub 仓库
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="about">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg></span>项目简介</h2>
+    <p class="sub">从 ScriptCat #711 改良而来，专注超星学习通 + 自有 AI 接口。</p>
+    <p>
+      本项目基于 <a href="https://scriptcat.org/zh-CN/script-show-page/711" target="_blank" rel="noopener">ScriptCat #711《超星学习通｜知到智慧树——网课小助手》</a>（原版 v0.2.7）改良，
+      在此向原作者致敬。改良款做了三件核心的事：<strong>砍掉第三方题库、只保留超星学习通、把答题能力交给你自己的 AI</strong>。
+    </p>
+    <p>
+      脚本在页面加载时只创建一个极轻量的悬浮按钮，点击后才挂载面板，因此不会拖慢超星页面；
+      面板内部已完全不依赖 ElementPlus，全部使用原生组件实现，打开与点击都不再卡顿。
+    </p>
+    <div class="chips">
+      <span class="chip">OpenAI 兼容接口</span>
+      <span class="chip">无题库依赖</span>
+      <span class="chip">原生面板 · 不卡顿</span>
+      <span class="chip">GitHub Pages 自动更新</span>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.4l6.1-.8L12 3z"/></svg></span>核心特性</h2>
+    <p class="sub">功能按「答题 / 学习流程 / 面板 / 更新」四类整理。</p>
+    <div class="grid">
+      <div class="card"><h3><span class="dot"></span>AI 自动答题</h3><p>对接任意 OpenAI 兼容接口（OpenAI、DeepSeek、通义千问、豆包、Kimi、小米 MiMo、本地 Ollama 等），把题干与选项发给你的 AI，解析回复后自动填入。</p></div>
+      <div class="card"><h3><span class="dot"></span>全题型支持</h3><p>单选、多选、判断、填空、简答均可处理，不依赖任何题库与题库密钥。</p></div>
+      <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频自动播放与切换</h3><p>自动定位任务点视频（含多层 iframe 兜底查找）并播放，看完自动进入下一章节。</p></div>
+      <div class="card"><h3><span class="dot"></span>文档 / PPT 自动阅读</h3><p>递归进入嵌套 iframe，滑动到真正的内容渲染层，自动完成文档、PDF 的阅读任务点。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频智能加速</h3><p>自动选取播放器允许的最高倍速（默认 2x，课程开放更高则取更高）；支持拖到结尾前几秒快速完成，教师禁止拖动时回退高倍速播放。</p></div>
+      <div class="card"><h3><span class="dot"></span>覆盖主要场景</h3><p>视频任务点、章节测试、作业、考试均可自动完成；支持自动提交与正确率阈值策略。</p></div>
+      <div class="card"><h3><span class="dot"></span>运行日志与导出</h3><p>「首页」实时显示运行日志，可滚动查看，并支持一键导出为 <code>.txt</code>，方便排查问题。</p></div>
+      <div class="card"><h3><span class="dot"></span>轻量原生面板</h3><p>面板已移除 ElementPlus，全部原生实现；页面加载只创建一个悬浮按钮，点击才挂载，打开不卡、点击不卡。</p></div>
+      <div class="card"><h3><span class="dot"></span>自动检查更新</h3><p>更新地址使用 GitHub Pages（约 10 分钟缓存），发布新版本后很快就能收到更新提示。</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>安装</h2>
+    <p class="sub">三步完成，只需装一次。</p>
+    <div class="steps">
+      <div class="step">
+        <div>
+          <h4>安装用户脚本管理器</h4>
+          <p>任选其一：<a href="https://www.tampermonkey.net/" target="_blank" rel="noopener">Tampermonkey</a>（油猴）、<a href="https://scriptcat.org/" target="_blank" rel="noopener">ScriptCat</a>、暴力猴（Violentmonkey）等支持 <code>@require</code> / <code>@connect</code> 的管理器。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h4>打开脚本地址，按提示安装</h4>
+          <p>管理器会自动弹出安装页。这是最新版地址，也是之后自动更新的来源：</p>
+          <div class="codebox">
+            <code id="installUrl">https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js</code>
+            <button class="copy" id="copyBtn" title="复制地址" aria-label="复制地址">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            </button>
+          </div>
+          <p>也可以把仓库里的 <code>chaoxing-ai-answer-assistant.user.js</code> 拖进管理器，或复制内容新建脚本。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h4>确认已启用并打开超星页面</h4>
+          <p>安装后在管理器里确认脚本为启用状态。打开任意超星页面，右下角会出现一个蓝色圆形「AI」按钮，点击即可展开面板。</p>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      更新提示不出现时，可在管理器里手动点一次「检查更新」。脚本的 <code>@updateURL</code> 指向 GitHub Pages，缓存约 10 分钟。
+    </div>
+  </section>
+
+  <section id="config">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>配置 AI 接口（必做）</h2>
+    <p class="sub">不配置 AI，脚本不会答题。</p>
+    <div class="steps">
+      <div class="step"><div><h4>打开面板并切到「答题」</h4><p>点击右下角「AI」按钮展开面板，选择顶部「答题」标签。</p></div></div>
+      <div class="step"><div><h4>勾选「启用 AI 接口答题」</h4><p>未勾选时不会调用 AI。</p></div></div>
+      <div class="step">
+        <div>
+          <h4>填写接口地址、密钥、模型</h4>
+          <p>可先从下拉选择预设，自动填好接口地址；模型通常需要自己填写（如 <code>gpt-4o-mini</code>、<code>deepseek-chat</code>）。</p>
+        </div>
+      </div>
+      <div class="step"><div><h4>点「测试连接」验证</h4><p>脚本会发一个极简 ping 请求，成功会显示「连接成功（HTTP 200）」，失败会给出 HTTP 状态或网络 / 跨域原因。</p></div></div>
+      <div class="step"><div><h4>刷新页面开始使用</h4><p>配置会自动保存，下次打开无需重复填写。</p></div></div>
+    </div>
+
+    <h3 style="margin:26px 0 6px;font-size:16px;">字段说明</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>配置项</th><th>说明</th><th>示例</th></tr></thead>
+        <tbody>
+          <tr><td>接口地址 baseUrl</td><td>OpenAI 兼容的 <code>/v1</code> 基址</td><td><code>https://api.openai.com/v1</code></td></tr>
+          <tr><td>API Key</td><td>你的接口密钥</td><td><code>sk-xxxx</code></td></tr>
+          <tr><td>模型 model</td><td>要调用的模型名</td><td><code>deepseek-chat</code>、<code>gpt-4o-mini</code></td></tr>
+          <tr><td>要求 customInstruction</td><td>可选，附加给 AI 的额外答题要求</td><td>例如「只输出答案」</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:26px 0 6px;font-size:16px;">内置预设</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>预设</th><th>自动填入的接口地址</th></tr></thead>
+        <tbody>
+          <tr><td>OpenAI (GPT)</td><td><code>https://api.openai.com/v1</code></td></tr>
+          <tr><td>DeepSeek (深度求索)</td><td><code>https://api.deepseek.com/v1</code></td></tr>
+          <tr><td>通义千问 (Qwen)</td><td><code>https://dashscope.aliyuncs.com/compatible-mode/v1</code></td></tr>
+          <tr><td>豆包 (火山方舟)</td><td><code>https://ark.cn-beijing.volces.com/api/v3</code></td></tr>
+          <tr><td>Kimi (月之暗面)</td><td><code>https://api.moonshot.cn/v1</code></td></tr>
+          <tr><td>小米 MiMo</td><td><code>https://api.xiaomimimo.com/v1</code></td></tr>
+          <tr><td>空白（自定义）</td><td>清空地址，自行填写</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">预设只填「接口地址」，模型名需按你所使用的服务自行填写；本地 Ollama 可用 <code>http://localhost:11434/v1</code>，模型填 <code>qwen2.5</code> 之类。</div>
+  </section>
+
+  <section id="usage">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></span>面板使用说明</h2>
+    <p class="sub">面板由顶部「AI」悬浮按钮打开，可拖拽、可最小化。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标签</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>首页</td><td>运行日志。显示加载、识别任务、答题、异常等信息，右上角「导出」可保存为 <code>.txt</code>。</td></tr>
+          <tr><td>答题</td><td>AI 接口配置（地址 / 密钥 / 模型 / 要求、预设、测试连接）与当前页面的题目表格（# / 题目 / 答案，含状态图例）。</td></tr>
+          <tr><td>设置</td><td>章节设置、考试设置、其他参数（切换答题间隔、正确率阈值、答案相似度阈值）。</td></tr>
+          <tr><td>教程</td><td>快速上手指引。</td></tr>
+          <tr><td>协议</td><td>使用协议与免责声明。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:26px 0 6px;font-size:16px;">标签与页面的联动规则</h3>
+    <p style="margin:0 0 12px;color:var(--muted);font-size:13.5px;">面板会根据当前页面地址自动选择初始标签，避免停在无关页面；页面内跳转（不刷新）也会跟随更新。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>当前页面特征</th><th>面板标签</th></tr></thead>
+        <tbody>
+          <tr><td>章节学习 <code>studentstudy</code>、作业 <code>dowork</code> / <code>/work</code> / <code>homework</code>、考试 <code>exam</code>、答题服务 <code>mooc-ans</code></td><td>答题</td></tr>
+          <tr><td>学习通门户首页、课程详情等其它页面</td><td>首页</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">脚本在真正发现作业或发布题目时，也会自动切到「答题」；其余时候标签保持跟随页面，不再被强制跳回首页。</div>
+
+    <h3 style="margin:26px 0 6px;font-size:16px;">设置项说明</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>分组</th><th>设置项</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4">章节设置</td><td>章节作业自动提交</td><td>章节内的作业自动提交。</td></tr>
+          <tr><td>是否自动下一章节</td><td>当前章节任务点完成后自动进入下一章。</td></tr>
+          <tr><td>只答题，不做其他</td><td>只做答题相关，跳过 PPT / 文档 / 音视频的自动阅读。</td></tr>
+          <tr><td>视频弹题自动处理</td><td>视频播放中弹出的题目自动作答。</td></tr>
+          <tr><td>考试设置</td><td>是否自动切换</td><td>考试中是否自动切换到下一题。</td></tr>
+          <tr><td rowspan="3">其他参数</td><td>切换、答题间隔，单位秒</td><td>题目之间、任务切换之间的等待秒数。</td></tr>
+          <tr><td>正确率达到多少自动提交</td><td>作答正确率达到该值时自动提交。</td></tr>
+          <tr><td>答案相似度超过多少选择</td><td>AI 答案与选项的相似度阈值，超过即选择该项。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="domains">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg></span>生效域名</h2>
+    <p class="sub">脚本通过 <code>@match</code> 在下列域名生效。</p>
+    <div class="chips">
+      <span class="chip">*.chaoxing.com</span>
+      <span class="chip">*.edu.cn</span>
+      <span class="chip">*.nbdlib.cn</span>
+      <span class="chip">*.hnsyu.net</span>
+      <span class="chip">*.gdhkmooc.com</span>
+    </div>
+    <div class="note warn">悬浮按钮只在<strong>顶层页面</strong>创建一次。若你看到多个「AI」按钮，说明脚本版本较旧（&lt; 1.24），更新即可。</div>
+  </section>
+
+  <section id="faq">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.8.7-1.7 1.1-1.7 2.2"/><path d="M12 17h.01"/></svg></span>常见问题</h2>
+    <p class="sub">按「现象 → 原因 → 处理」整理。</p>
+
+    <details>
+      <summary>点了「AI」按钮，面板打不开 / 没反应</summary>
+      <div class="ans">
+        <p>先确认版本：1.22 存在一个渲染崩溃问题，会导致面板无法挂载，1.23 已修复。请在管理器里查看脚本版本，低于 1.23 请更新。</p>
+        <p>1.23 起，如果挂载仍然失败，页面左下角会出现一条<strong>红色错误提示条</strong>（约 8 秒），把上面的文字反馈即可定位。</p>
+        <p>另外请确认脚本为启用状态，且当前页面域名在「生效域名」范围内。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>页面上出现了两个「AI」按钮，只有一个能用</summary>
+      <div class="ans">
+        <p>这是 1.23 及更早版本的问题：脚本会注入到所有 <code>*.chaoxing.com</code> 的 iframe，每个 iframe 都创建了一个悬浮按钮，但只有顶层那个能打开全屏面板。</p>
+        <p>1.24 起已限制为<strong>只在顶层页面创建按钮与面板</strong>，更新后多余按钮会消失。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>切换标签后，内容变了但顶部高亮没变</summary>
+      <div class="ans">
+        <p>1.26 之前的问题：标签按钮的编译优化标记缺少 class 更新位，导致高亮不重算。</p>
+        <p>1.26 起已修复，点击哪个标签，高亮就跟着走。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>我已经进了答题页，面板却还显示「首页」</summary>
+      <div class="ans">
+        <p>1.25 起，面板会根据页面地址自动选择标签：<code>studentstudy</code>、<code>dowork</code>、<code>/work</code>、<code>homework</code>、<code>exam</code>、<code>mooc-ans</code> 等页面显示「答题」，其余显示「首页」。</p>
+        <p>如果你的答题页地址比较特殊、没有被规则覆盖，可以手动点「答题」，或把地址反馈给作者加入规则。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>更新了新版本，但脚本还是旧版</summary>
+      <div class="ans">
+        <p>先确认版本：面板「首页」的第一条日志会打印「脚本加载成功，正在解析网页（当前版本 vX.Y）」，也可在管理器里查看。</p>
+        <p>更新地址已从 jsDelivr 换成 GitHub Pages（缓存约 10 分钟）。若刚发布不久，等几分钟或在管理器里手动点「检查更新」；仍是旧版可重新打开安装地址覆盖安装。</p>
+        <p>注意：从旧版本（jsDelivr 更新通道）升级时，需要手动重装一次新地址，之后才会走 Pages 通道。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>日志提示「该页面无任务，请进入章节或答题页面使用」</summary>
+      <div class="ans">
+        <p>说明当前页面（如课程详情页）没有可执行的任务点。进入具体章节、作业或考试页面即可。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>「测试连接」失败：请求出错 / 超时 / 返回异常</summary>
+      <div class="ans">
+        <ul>
+          <li>接口地址需为 OpenAI 兼容的 <code>/v1</code> 基址，不要带 <code>/chat/completions</code>。</li>
+          <li>确认 API Key 正确、未过期，且账户有额度。</li>
+          <li>确认模型名与所填接口匹配（不同服务商模型名不同）。</li>
+          <li>超时时间为 20 秒；网络不稳定或被墙时可能失败，可换网络重试。</li>
+          <li>返回异常时，提示里会带 HTTP 状态码与响应片段，可据此判断是鉴权、模型不存在还是余额问题。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>视频不加速 / 拖不动进度条</summary>
+      <div class="ans">
+        <p>部分课程由教师关闭了拖动，脚本会自动回退为「最高倍速播放」；倍速上限由播放器开放程度决定，课程未开放更高倍速时只能到 2x 左右。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>配置会丢吗？换浏览器还在吗？</summary>
+      <div class="ans">
+        <p>配置会保存在脚本存储（以及同源的 localStorage）中，刷新、重开页面都会保留。换浏览器 / 换设备不会自动同步，需要重新填写。</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="changelog">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.27。</p>
+    <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.27</span><p>更新地址改用 GitHub Pages，缓存从约 12 小时降到约 10 分钟。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.26</span><p>修复切换标签后高亮不更新（补上 class 的编译更新位）。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.25</span><p>标签按页面 URL 类型判定，不再被逻辑强行压回首页；新增页面内跳转监听。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.24</span><p>修复重复「AI」按钮（仅顶层创建）、标签不跟随页面、设置项长标签被截断。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.23</span><p>修复点「AI」按钮打不开（null 子节点导致渲染崩溃）、日志文字不显示，并新增挂载失败提示条。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.22</span><p>彻底移除 ElementPlus，面板改为纯原生实现，打开与点击都不再卡顿。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.21</span><p>改为「点击悬浮按钮才挂载面板」，任意超星子域打开不再卡。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.18–1.20</span><p>逐步定位卡顿根因为面板挂载，并修复 <code>/manage?ws=</code> 等页面漏判。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.14–1.17</span><p>新增小米 MiMo 预设，替换高开销组件，缓解卡顿。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.12–1.13</span><p>新增 AI 预设接口源、一键测试连接；预设模型留空，仅填地址。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.11</span><p>README 记录的基线版本。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.0–1.10</span><p>从 ScriptCat #711 改良：移除题库与知到智慧树，接入自有 AI 接口。</p></div>
+    </div>
+  </section>
+
+  <section id="disclaimer">
+    <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3z"/><path d="M12 8v4M12 16h.01"/></svg></span>免责声明</h2>
+    <div class="note warn">
+      <p style="margin:0 0 6px;">本脚本仅供<strong>个人学习辅助</strong>与编程练习使用。</p>
+      <p style="margin:0 0 6px;">请务必遵守所在平台的使用条款，以及学校 / 机构的考试纪律与诚信要求。</p>
+      <p style="margin:0 0 6px;">AI 作答结果可能存在错误，重要测验 / 考试请自行核对。</p>
+      <p style="margin:0;">使用本脚本产生的任何后果由使用者自行承担，作者不承担任何责任。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="links">
+    <a href="https://github.com/Regionnor/xue-xi-tong" target="_blank" rel="noopener">GitHub 仓库</a>
+    <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
+    <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
+  </div>
+  <div>学习通AI答题小助手（Region改良款）· v1.27 · MIT License · 基于 ScriptCat #711 改良</div>
+</footer>
+
+<button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg>
+</button>
+
+<script>
+(function () {
+  "use strict";
+
+  /* 复制安装地址 */
+  var copyBtn = document.getElementById("copyBtn");
+  var urlEl = document.getElementById("installUrl");
+  if (copyBtn && urlEl) {
+    copyBtn.addEventListener("click", function () {
+      var text = urlEl.textContent.trim();
+      var done = function () {
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>';
+        setTimeout(function () {
+          copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+        }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+      } else {
+        fallback(text, done);
+      }
+    });
+  }
+  function fallback(text, cb) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    cb();
+  }
+
+  /* 滚动时高亮当前导航 */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#navLinks a"));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove("active"); });
+        var a = byId[en.target.id];
+        if (a) a.classList.add("active");
+      });
+    }, { rootMargin: "-70px 0px -70% 0px", threshold: 0 });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+
+  /* 回到顶部 */
+  var topBtn = document.getElementById("topBtn");
+  var onScroll = function () {
+    if (window.scrollY > 480) topBtn.classList.add("show");
+    else topBtn.classList.remove("show");
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  topBtn.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+</script>
+</body>
+</html>
