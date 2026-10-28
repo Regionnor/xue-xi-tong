@@ -20,7 +20,7 @@
 - **视频智能加速**：自动选择播放器可选的最高倍速（默认 2x，课程若开放更高则自动取更高），并支持拖到结尾前几秒极速过完；教师禁止拖动时自动回退高倍速播放。
 - **首页运行日志**：实时显示运行日志，可滚动查看，并支持一键导出为 `.txt` 文件，便于排查问题。
 - **启动日志显示当前版本号**：便于一眼确认脚本是否已更新到最新版。
-- **自动检查更新**：脚本头部内置 `@downloadURL` / `@updateURL`（jsDelivr），管理器会按 `main` 分支自动比对并提示更新。
+- **自动检查更新**：脚本头部内置 `@downloadURL` / `@updateURL`（GitHub Pages：`https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js`），管理器会自动比对并提示更新，无需再等 jsDelivr 的长缓存。
 
 ---
 
@@ -30,7 +30,7 @@
    - [Tampermonkey](https://www.tampermonkey.net/)
    - [ScriptCat](https://scriptcat.org/)
    - 暴力猴（Violentmonkey）等支持 `@require` / `@connect` 的管理器
-2. 将本仓库的 `chaoxing-ai-answer-assistant.user.js` 文件拖入管理器，或复制其内容新建脚本保存。
+2. 打开 <https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js>，管理器会自动弹出安装页；也可将本仓库的 `chaoxing-ai-answer-assistant.user.js` 文件拖入管理器，或复制其内容新建脚本保存。
 3. 确认脚本已启用。
 
 ---

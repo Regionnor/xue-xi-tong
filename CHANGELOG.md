@@ -8,6 +8,14 @@
 
 ---
 
+## [1.27] - 2026-10-28
+
+### 🔧 变更 (Changed) - 2026-10-28
+- **更新地址从 jsDelivr 改为 GitHub Pages**：`@downloadURL` / `@updateURL` 改为 `https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js`，避免 jsDelivr 对 `@main` 长达约 12 小时的缓存，更新后基本 10 分钟内即可生效。
+  - 注意：需在仓库 Settings → Pages 中选择 **Deploy from a branch → main → / (root)** 开启一次；开启后该地址即可直接安装与自动更新。
+
+---
+
 ## [1.26] - 2026-10-28
 
 ### 🛠 修复 (Fixed) - 2026-10-28
