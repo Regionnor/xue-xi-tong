@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.24
+// @version      1.25
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6091,7 +6091,6 @@
         runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
         processedIframeDocuments = /* @__PURE__ */ new WeakSet();
         questionStore.clearQuestion();
-        configStore.menuIndex = HOME_TAB_NAME;
         currentPage = page;
         (_b = page.iframe) == null ? void 0 : _b.addEventListener("load", onRootIframeLoad);
       }
@@ -6703,7 +6702,8 @@
       if (iframeSrc.includes("javascript:"))
         return Promise.resolve();
       if (isFinishedTask(iframe)) {
-        configStore.menuIndex = iframeSrc.includes("api/work") ? ANSWER_TAB_NAME2 : HOME_TAB_NAME;
+        if (iframeSrc.includes("api/work"))
+          configStore.menuIndex = ANSWER_TAB_NAME2;
         if (iframeSrc.includes("video") || iframeSrc.includes("audio")) {
           (_a = iframeDocument.documentElement ? iframeDocument.documentElement.querySelector("video, audio") : null) == null ? void 0 : _a.pause();
         }
@@ -6717,7 +6717,6 @@
           return Promise.resolve();
         }
         // 路由：来源类型 → 内容特征 → .ans-job-icon 三重兜底，避免因超星改版（来源路径/图标位置变化）漏处理、不滑动
-        configStore.menuIndex = HOME_TAB_NAME;
         const lowerSrc = (iframeSrc || "").toLowerCase();
         const docTypes = ["ppt", "pptx", "doc", "docx", "pdf"];
         const isPptDoc = docTypes.some((type) => lowerSrc.includes("modules/" + type) || lowerSrc.includes("/" + type + "/index.html")) || lowerSrc.includes("screen/file");
@@ -6885,10 +6884,21 @@
           updateVisible(true);
           return;
         }
-        // 未匹配到具体任务页：把面板重置回「首页」，避免仍停留在上次的「答题」标签（如从章节页返回首页时）
-        configStore.menuIndex = "0";
       };
+      // 根据页面 URL 判断该显示「首页」还是「答题」标签，避免沿用上次标签或一律停在首页。
+      // 覆盖超星常见答题/任务页：章节学习(studentstudy)、作业(work/dowork/homework)、考试(exam)、
+      // 以及答题服务域名路径(mooc-ans)。其余（门户首页、课程详情等）显示首页。
+      const tabNameForUrl = (u) => /(studentstudy|dowork|homework|\/work|exam|mooc-ans)/i.test(u || "") ? "1" : "0";
+      configStore.menuIndex = tabNameForUrl(url2);
       executeLogicByUrl(url2);
+      // 监听单页应用内的地址变化（超星部分跳转不整页刷新），地址一变就重新判定标签。
+      let lastHref = window.location.href;
+      setInterval(() => {
+        if (window.location.href === lastHref)
+          return;
+        lastHref = window.location.href;
+        configStore.menuIndex = tabNameForUrl(lastHref);
+      }, 1500);
       const tabs = vue.computed(() => [
         {
           name: "0",
