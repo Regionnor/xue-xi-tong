@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.19
+// @version      1.20
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7286,21 +7286,24 @@
     app.mount(createShadowMountNode());
   };
   const shouldSkipMount = () => {
-    const href = (window.location.href || "").toLowerCase();
-    // 教师后台 / 登录页等脚本无法使用的页面，跳过挂载，避免在这些页面卡顿
-    if (href.includes("/manage/"))
+    let url;
+    try {
+      url = new URL(window.location.href);
+    } catch (e) {
+      return false;
+    }
+    const href = (url.href || "").toLowerCase();
+    const path = (url.pathname || "").toLowerCase();
+    // 教师后台（含 /manage?ws= 这种无尾斜杠形式）/ 登录 / 鉴权等脚本用不到的页面，跳过挂载
+    if (path.startsWith("/manage"))
       return true;
-    if (href.includes("passport") || href.includes("login") || href.includes("/auth/"))
+    if (href.includes("passport") || href.includes("login") || path.startsWith("/auth/"))
       return true;
     // 各类门户 / 首页（vN.chaoxing.com 根路径等），脚本用不到面板，跳过挂载以杜绝卡顿
-    try {
-      const host = new URL(window.location.href).hostname;
-      if (/^v\d+\.chaoxing\.com$/.test(host)) {
-        const path = new URL(window.location.href).pathname;
-        if (path === "/" || path === "" || path === "/index" || path === "/home")
-          return true;
-      }
-    } catch (e) {
+    const host = url.hostname;
+    if (/^v\d+\.chaoxing\.com$/.test(host)) {
+      if (path === "/" || path === "" || path === "/home" || path === "/index")
+        return true;
     }
     return false;
   };
