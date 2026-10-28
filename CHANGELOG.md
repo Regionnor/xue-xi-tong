@@ -8,6 +8,23 @@
 
 ---
 
+## [1.12] - 2026-10-17
+
+### ✨ 新增 (Added) - 2026-10-17
+- **AI 接口「预设接口源」下拉框**：在「答题」设置 → AI 接口答题区，地址输入框上方新增一个 `el-select` 预设源，选一项即可一键填好「地址」与「模型」：
+  - `OpenAI (GPT)` → `https://api.openai.com/v1` / `gpt-4o-mini`
+  - `DeepSeek (深度求索)` → `https://api.deepseek.com/v1` / `deepseek-chat`
+  - `通义千问 (Qwen)` → `https://dashscope.aliyuncs.com/compatible-mode/v1` / `qwen-plus`
+  - `豆包 (火山方舟)` → `https://ark.cn-beijing.volces.com/api/v3` / `doubao-seed-1-6-250615`
+  - `Kimi (月之暗面)` → `https://api.moonshot.cn/v1` / `moonshot-v1-8k`
+  - `小米 MiMo（端点请核实）` → `https://api.miwifi.com/v1` / `mimo`（⚠️ 该端点为社区流传值，如不通请自行核对官方地址后修改）
+  - `空白（自定义）` → 清空地址与模型，手动填写自有接口
+- **AI 接口「测试连接」按钮**：在自定义要求输入框下方新增「测试连接」按钮。点击后用当前「地址 / 密钥 / 模型」向 `/chat/completions` 发送一条极简 `ping` 请求（`max_tokens:5`），并在按钮右侧实时显示结果：
+  - 成功（HTTP 2xx 且返回 `choices`）→ 绿色「连接成功（HTTP xxx）」
+  - 失败 → 红色提示，区分「HTTP 非 2xx + 响应片段」「返回异常（非标准 JSON）」「请求出错（地址/网络/跨域）」「请求超时（20s）」「请先填写 API Key / 接口地址」等情形。
+
+---
+
 ## [1.11] - 2026-10-16
 
 ### 🛠 修复 (Fixed) - 2026-10-16

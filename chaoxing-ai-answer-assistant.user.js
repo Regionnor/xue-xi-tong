@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.11
+// @version      1.12
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1197,6 +1197,84 @@
     },
     setup(__props) {
       const configStore = useConfigStore();
+      const aiPresets = [
+        { label: "OpenAI (GPT)", value: "openai", baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+        { label: "DeepSeek (深度求索)", value: "deepseek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
+        { label: "通义千问 (Qwen)", value: "qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+        { label: "豆包 (火山方舟)", value: "doubao", baseUrl: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-seed-1-6-250615" },
+        { label: "Kimi (月之暗面)", value: "kimi", baseUrl: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
+        { label: "小米 MiMo（端点请核实）", value: "mimo", baseUrl: "https://api.miwifi.com/v1", model: "mimo" },
+        { label: "空白（自定义）", value: "custom", baseUrl: "", model: "" }
+      ];
+      const currentPreset = vue.ref("openai");
+      const applyPreset = (val) => {
+        currentPreset.value = val;
+        const p = aiPresets.find((x) => x.value === val);
+        if (p) {
+          configStore.aiConfig.baseUrl = p.baseUrl;
+          if (p.model) configStore.aiConfig.model = p.model;
+        }
+      };
+      const testLoading = vue.ref(false);
+      const testResult = vue.ref(null);
+      const testConnection = () => {
+        testResult.value = null;
+        const cfg = configStore.aiConfig;
+        if (!(cfg.apiKey || "").trim()) {
+          testResult.value = { ok: false, msg: "请先填写 API Key" };
+          return;
+        }
+        const baseUrl = (cfg.baseUrl || "https://api.openai.com/v1").replace(/\/+$/, "");
+        if (!baseUrl) {
+          testResult.value = { ok: false, msg: "请先填写接口地址" };
+          return;
+        }
+        const url = baseUrl + "/chat/completions";
+        const headers = { "Content-Type": "application/json", "Authorization": "Bearer " + (cfg.apiKey || "").trim() };
+        const body = JSON.stringify({
+          model: cfg.model || "gpt-4o-mini",
+          messages: [{ role: "user", content: "ping" }],
+          max_tokens: 5,
+          temperature: 0
+        });
+        testLoading.value = true;
+        let settled = false;
+        const finish = (r) => {
+          if (settled) return;
+          settled = true;
+          testLoading.value = false;
+          testResult.value = r;
+        };
+        try {
+          _GM_xmlhttpRequest({
+            url,
+            method: "POST",
+            headers,
+            data: body,
+            timeout: 2e4,
+            onload: (res) => {
+              if (res.status >= 200 && res.status < 300) {
+                try {
+                  const json = JSON.parse(res.responseText);
+                  if (json && json.choices && json.choices[0]) {
+                    finish({ ok: true, msg: "连接成功（HTTP " + res.status + "）" });
+                    return;
+                  }
+                } catch (e) {
+                }
+                finish({ ok: false, msg: "返回异常（HTTP " + res.status + "）：" + (res.responseText || "").slice(0, 120) });
+              } else {
+                finish({ ok: false, msg: "连接失败（HTTP " + res.status + "）：" + (res.responseText || "").slice(0, 120) });
+              }
+            },
+            onerror: () => finish({ ok: false, msg: "请求出错，请检查地址 / 网络 / 跨域" }),
+            ontimeout: () => finish({ ok: false, msg: "请求超时（20s）" }),
+            onabort: () => finish({ ok: false, msg: "请求已取消" })
+          });
+        } catch (e) {
+          finish({ ok: false, msg: "请求异常：" + (e && e.message ? e.message : String(e)) });
+        }
+      };
       const getDisplayTitle = (question) => {
         var _a;
         return ((_a = question.searchText) == null ? void 0 : _a.stem) || question.title;
@@ -1209,6 +1287,9 @@
         const _component_el_table_column = vue.resolveComponent("el-table-column");
         const _component_el_table = vue.resolveComponent("el-table");
         const _component_el_empty = vue.resolveComponent("el-empty");
+        const _component_el_select = vue.resolveComponent("el-select");
+        const _component_el_option = vue.resolveComponent("el-option");
+        const _component_el_button = vue.resolveComponent("el-button");
         return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
           vue.createVNode(_component_el_divider, { "border-style": "dashed" }, {
             default: vue.withCtx(() => [
@@ -1223,6 +1304,20 @@
             label: "启用 AI 接口答题",
             size: "small"
           }, null, 8, ["modelValue", "onUpdate:modelValue", "label"]),
+          vue.createVNode(_component_el_select, {
+            modelValue: vue.unref(currentPreset),
+            "onUpdate:modelValue": applyPreset,
+            placeholder: "选择预设接口源",
+            size: "small",
+            style: { width: "100%", marginBottom: "6px" }
+          }, {
+            default: vue.withCtx(() => [
+              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, (p) => {
+                return vue.openBlock(), vue.createBlock(_component_el_option, { key: p.value, label: p.label, value: p.value }, null, 8, ["label", "value"]);
+              }), 256))
+            ]),
+            _: 1
+          }),
           vue.createVNode(_component_el_input, {
             class: "token-input",
             modelValue: vue.unref(configStore).aiConfig.baseUrl,
@@ -1270,6 +1365,18 @@
               vue.createElementVNode("span", null, "要求")
             ])
           }, 8, ["modelValue", "type"]),
+          vue.createVNode(_component_el_button, {
+            size: "small",
+            type: "primary",
+            loading: vue.unref(testLoading),
+            onClick: testConnection,
+            style: { marginRight: "8px" }
+          }, {
+            default: vue.withCtx(() => ["测试连接"])
+          }, 8, ["loading"]),
+          vue.unref(testResult) ? vue.createVNode("span", {
+            style: { color: vue.unref(testResult).ok ? "#67c23a" : "#f56c6c", fontSize: "12px" }
+          }, vue.toDisplayString(vue.unref(testResult).msg), 1) : null,
           vue.withDirectives(vue.createElementVNode("div", _hoisted_1$3, [
             _hoisted_2$3,
             vue.createVNode(_component_el_table, {
