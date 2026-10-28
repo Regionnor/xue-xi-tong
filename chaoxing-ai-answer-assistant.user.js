@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.18
+// @version      1.19
 // @downloadURL  https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/Regionnor/xue-xi-tong@main/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7292,6 +7292,16 @@
       return true;
     if (href.includes("passport") || href.includes("login") || href.includes("/auth/"))
       return true;
+    // 各类门户 / 首页（vN.chaoxing.com 根路径等），脚本用不到面板，跳过挂载以杜绝卡顿
+    try {
+      const host = new URL(window.location.href).hostname;
+      if (/^v\d+\.chaoxing\.com$/.test(host)) {
+        const path = new URL(window.location.href).pathname;
+        if (path === "/" || path === "" || path === "/index" || path === "/home")
+          return true;
+      }
+    } catch (e) {
+    }
     return false;
   };
   const timer = setInterval(() => {
