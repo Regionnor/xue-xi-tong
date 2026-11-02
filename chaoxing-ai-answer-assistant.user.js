@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.30
+// @version      1.31
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -807,6 +807,7 @@
       }
     }
   });
+  // sleep 的参数单位是「秒」（内部 ×1000）。传入毫秒数会被放大 1000 倍，务必注意。
   const sleep = (second) => {
     return new Promise((resolve) => setTimeout(resolve, second * 1e3));
   };
@@ -6213,7 +6214,7 @@
                 };
                 let how = tryNext();
                 if (!how) {
-                  await sleep(2500);
+                  await sleep(2.5);
                   if (thisTaskId === currentWatchIframeTaskId && context.isCurrent())
                     how = tryNext();
                 }
@@ -6596,7 +6597,7 @@
             try {
               const mediaSrc = mediaElement.currentSrc || mediaElement.src || "(无 src)";
               logStore.addLog(`[诊断] 已找到 <${mediaType}>（src=${String(mediaSrc).slice(0, 90)}），准备播放`, "primary");
-              mediaElement.pause();
+              // 不再强行 pause()：若播放器已自行开始播放，这里 pause 再 play 会与其状态机打架（AbortError 的常见来源）
               mediaElement.muted = true;
               if (mediaType === "video") {
                 quiz = watchVideoQuiz({
@@ -6679,7 +6680,7 @@
                     logStore.addLog(`[诊断] play() 被拒绝（${String((playError == null ? void 0 : playError.name) || playError)}），第 ${attempt + 1} 次尝试点击播放按钮`, "warning");
                     clickPlayButton();
                   }
-                  await sleep(1200);
+                  await sleep(1.2);
                   if (settled)
                     break;
                   const progressed = (mediaElement.currentTime || 0) > startTime + 0.2;
@@ -6691,22 +6692,32 @@
                   }
                 }
               }
-              if (settled)
+              if (settled) {
+                logStore.addLog(`[诊断] 播放流程已结束（settled），不再继续`, "primary");
                 return;
-              if (!context.isCurrent())
+              }
+              if (!context.isCurrent()) {
+                logStore.addLog(`[诊断] 页面已切换，结束本任务点`, "primary");
                 return finish();
-              if (isFinishedTask(iframe))
+              }
+              if (isFinishedTask(iframe)) {
+                logStore.addLog(`[诊断] 任务点已完成，结束本任务点`, "success");
                 return finish();
-              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
-                if (mediaElement.paused) {
-                  logStore.addLog(`[诊断] 视频仍未开始播放（可能被自动播放策略拦截，或该任务点限制倍速/拖拽），请在视频上点一下播放或刷新重试`, "warning");
-                } else {
-                  logStore.addLog("播放成功", "success");
-                }
+              }
+              if (quiz == null ? void 0 : quiz.hasActiveQuiz()) {
+                logStore.addLog(`[诊断] 检测到视频弹题，暂缓自动播放`, "primary");
+              } else if (mediaElement.paused) {
+                logStore.addLog(`[诊断] 视频仍未开始播放（paused=${mediaElement.paused}，readyState=${mediaElement.readyState}，current=${(mediaElement.currentTime || 0).toFixed(1)}s），请手动点一下播放或刷新重试`, "warning");
+              } else {
+                logStore.addLog(`播放成功（${mediaElement.playbackRate}x，当前 ${(mediaElement.currentTime || 0).toFixed(1)}s）`, "success");
               }
               // 播放确认已开始后，再设置倍速 / 拖拽（顺序反过来会把播放器打停）
               if (mediaType === "video" && !mediaElement.paused && !(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
                 applyMediaOptimizations(mediaElement);
+              }
+              try {
+                logStore.addLog(`[诊断] 播放状态：paused=${mediaElement.paused}，currentTime=${(mediaElement.currentTime || 0).toFixed(1)}s，readyState=${mediaElement.readyState}，rate=${mediaElement.playbackRate}`, "primary");
+              } catch (e2) {
               }
               mediaElement.addEventListener("pause", resume);
               mediaElement.addEventListener("ended", ended);
