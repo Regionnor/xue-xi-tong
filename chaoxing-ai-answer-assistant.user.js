@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.29
+// @version      1.30
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6442,6 +6442,22 @@
             } catch (e2) {
             }
             logStore.addLog(`已设置倍速：${chosen}x（取播放器可选上限，避免超出导致播放失败）`, "primary");
+            if (chosen > 1) {
+              // 有些播放器不接受非 1x，设速后会直接暂停；发现被暂停就回退 1x 并继续播，避免「动一下就停」
+              setTimeout(() => {
+                try {
+                  if (settled || !context.isCurrent())
+                    return;
+                  if (video.paused && (video.currentTime || 0) < 1.5) {
+                    video.playbackRate = 1;
+                    logStore.addLog(`设置 ${chosen}x 后播放被中断，已回退到 1x 并继续播放`, "warning");
+                    void video.play().catch(() => {
+                    });
+                  }
+                } catch (e2) {
+                }
+              }, 1800);
+            }
             let reassertCount = 0;
             const reassert = () => {
               if (isFinishedTask(iframe) || !context.isCurrent())
@@ -6479,6 +6495,11 @@
             logStore.addLog(`[诊断] 设置倍速失败：${String(e2)}`, "warning");
           }
           try {
+            // 必须在真正开始播放之后再拖拽：播放前 seek 会被播放器复位，表现为「拖了没反应」
+            if (video.paused) {
+              logStore.addLog(`[诊断] 视频尚未开始播放，暂不拖拽进度条`, "primary");
+              return;
+            }
             let duration = 0;
             try {
               duration = video.duration;
@@ -6577,9 +6598,6 @@
               logStore.addLog(`[诊断] 已找到 <${mediaType}>（src=${String(mediaSrc).slice(0, 90)}），准备播放`, "primary");
               mediaElement.pause();
               mediaElement.muted = true;
-              if (mediaType === "video") {
-                applyMediaOptimizations(mediaElement);
-              }
               if (mediaType === "video") {
                 quiz = watchVideoQuiz({
                   document: iframeDocument,
@@ -6685,6 +6703,10 @@
                 } else {
                   logStore.addLog("播放成功", "success");
                 }
+              }
+              // 播放确认已开始后，再设置倍速 / 拖拽（顺序反过来会把播放器打停）
+              if (mediaType === "video" && !mediaElement.paused && !(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
+                applyMediaOptimizations(mediaElement);
               }
               mediaElement.addEventListener("pause", resume);
               mediaElement.addEventListener("ended", ended);
