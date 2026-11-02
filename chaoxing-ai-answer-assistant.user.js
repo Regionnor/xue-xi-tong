@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.28
+// @version      1.29
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6134,36 +6134,114 @@
                 await sleep(configStore.otherParams.params[0].value);
                 if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
                   return;
-                let nextClicked = false;
-                const tryClick = (sel) => {
+                const isVisible = (el) => {
                   try {
-                    const b = document.querySelector(sel);
-                    if (b && b.style.display !== "none") {
-                      b.click();
-                      return true;
+                    if (!el)
+                      return false;
+                    const st = window.getComputedStyle(el);
+                    if (st.display === "none" || st.visibility === "hidden" || st.pointerEvents === "none")
+                      return false;
+                    const r = el.getBoundingClientRect();
+                    return r.width > 4 && r.height > 4;
+                  } catch (e2) {
+                    return false;
+                  }
+                };
+                const clickFirst = (root, sel) => {
+                  try {
+                    const list = root.querySelectorAll(sel);
+                    for (let i2 = 0; i2 < list.length; i2++) {
+                      if (isVisible(list[i2])) {
+                        list[i2].click();
+                        return true;
+                      }
                     }
                   } catch (e2) {
                   }
                   return false;
                 };
                 const selectors = ["#prevNextFocusNext", ".jb_btn.jb_btn_92.fr.fs14.nextChapter", ".nextChapter", ".nextChapterBtn", "#nextChapter"];
-                for (let s = 0; s < selectors.length; s++) {
-                  if (tryClick(selectors[s])) {
-                    nextClicked = true;
-                    break;
+                const nextTextRe = /^(下一节|下一小节|下一个|下一任务|下一章|继续学习|继续|下一节学习)$/;
+                const clickByText = (root) => {
+                  try {
+                    const nodes = root.querySelectorAll("a,button,[role='button'],li,span,div,em,strong");
+                    let scanned = 0;
+                    for (let i2 = 0; i2 < nodes.length; i2++) {
+                      if (++scanned > 4e3)
+                        break;
+                      const n = nodes[i2];
+                      if (n.childElementCount > 3)
+                        continue;
+                      const t = (n.textContent || "").replace(/\s+/g, "");
+                      if (!t || t.length > 8 || !nextTextRe.test(t))
+                        continue;
+                      if (!isVisible(n))
+                        continue;
+                      (n.closest("a,button,li,div") || n).click();
+                      return t;
+                    }
+                  } catch (e2) {
                   }
+                  return null;
+                };
+                const tryNext = () => {
+                  for (let s = 0; s < selectors.length; s++) {
+                    if (clickFirst(document, selectors[s]))
+                      return "选择器";
+                  }
+                  const hit = clickByText(document);
+                  if (hit)
+                    return `文本「${hit}」`;
+                  try {
+                    const frames = Array.from(document.querySelectorAll("iframe"));
+                    for (let i2 = 0; i2 < frames.length; i2++) {
+                      let doc = null;
+                      try {
+                        doc = frames[i2].contentDocument;
+                      } catch (e2) {
+                        doc = null;
+                      }
+                      if (!doc)
+                        continue;
+                      const h2 = clickByText(doc);
+                      if (h2)
+                        return `iframe 内文本「${h2}」`;
+                    }
+                  } catch (e2) {
+                  }
+                  return null;
+                };
+                let how = tryNext();
+                if (!how) {
+                  await sleep(2500);
+                  if (thisTaskId === currentWatchIframeTaskId && context.isCurrent())
+                    how = tryNext();
                 }
-                if (nextClicked) {
+                if (how) {
+                  logStore.addLog(`已触发「下一节」（${how}），等待页面切换`, "primary");
                   setTimeout(() => {
                     try {
                       const confirmBtn = document.querySelector(".maskDiv.jobFinishTip .nextChapter, .jobFinishTip .nextChapter, .jobFinishTip .el-button, .jobFinishTip button");
-                      if (confirmBtn && confirmBtn.style.display !== "none")
+                      if (confirmBtn && isVisible(confirmBtn))
                         confirmBtn.click();
                     } catch (e2) {
                     }
                   }, 800);
                 } else {
-                  logStore.addLog(`未找到可用的「下一节」按钮（已尝试多种选择器），可能已到最后一节或页面结构已变`, "danger");
+                  let cands = [];
+                  try {
+                    const nodes = document.querySelectorAll("a,button,li,span,div");
+                    for (let i2 = 0; i2 < nodes.length && cands.length < 10; i2++) {
+                      const n = nodes[i2];
+                      if (n.childElementCount > 3)
+                        continue;
+                      const t = (n.textContent || "").replace(/\s+/g, "");
+                      if (t && t.length <= 10 && /下|继续|完成/.test(t) && isVisible(n))
+                        cands.push(t);
+                    }
+                  } catch (e2) {
+                  }
+                  logStore.addLog(`未找到可用的「下一节」按钮（已试 5 个选择器 + 文本匹配 + iframe 内查找）。当前可见相关文案：${cands.join("、") || "(无)"}`, "danger");
                 }
               } else {
                 logStore.addLog(`已经关闭自动下一章节，在设置里可更改`, "danger");
