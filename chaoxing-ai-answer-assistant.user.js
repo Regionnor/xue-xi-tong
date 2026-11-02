@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.33
+// @version      1.34
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6055,6 +6055,8 @@
     let processedIframeDocuments = /* @__PURE__ */ new WeakSet();
     // 记录「已经拖拽过 / 已确认拖拽无效」的视频 src：同一个视频只跳一次，避免播完又跳、跳完又播的循环
     let seekedVideoSrcs = /* @__PURE__ */ new Set();
+    // 记录本页已播放完成的视频 src：播放器复位后不再重复播放同一段视频
+    let completedVideoSrcs = /* @__PURE__ */ new Set();
     let currentPage;
     let chapterController = new AbortController();
     let currentWatchIframeTaskId = 0;
@@ -6098,6 +6100,7 @@
         runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
         processedIframeDocuments = /* @__PURE__ */ new WeakSet();
         seekedVideoSrcs = /* @__PURE__ */ new Set();
+        completedVideoSrcs = /* @__PURE__ */ new Set();
         questionStore.clearQuestion();
         currentPage = page;
         (_b = page.iframe) == null ? void 0 : _b.addEventListener("load", onRootIframeLoad);
@@ -6219,7 +6222,83 @@
                   }
                   return null;
                 };
+                const pageSig = () => {
+                  var _a;
+                  const f = document.querySelector("iframe");
+                  return window.location.href + "|" + ((f == null ? void 0 : f.src) || "");
+                };
+                // 新版学习通常见「1 Case 1 / 2 Case 2 / 3 Case 3」这类卡片标签：
+                // 找到当前激活的卡片，点它后面的下一个卡片（文本需带序号，避免误点普通导航）
+                const clickNextCard = (root) => {
+                  try {
+                    const nodes = root.querySelectorAll("[class*='active'],[class*='cur'],[aria-selected='true']");
+                    for (let i2 = 0; i2 < nodes.length; i2++) {
+                      const n = nodes[i2];
+                      const cls = typeof n.className === "string" ? n.className : "";
+                      const isActive = /(^|\s|-)(active|is-active|cur|current|selected)(\s|$|-)/.test(cls) || n.getAttribute("aria-selected") === "true";
+                      if (!isActive)
+                        continue;
+                      // 只处理「带序号」的卡片标签（如 1 Case 1 / 2 Case 2 / 3 Case 3），避免误点普通导航
+                      if (!/^\d/.test((n.textContent || "").replace(/\s+/g, "")))
+                        continue;
+                      const p = n.parentElement;
+                      if (!p)
+                        continue;
+                      const sibs = Array.from(p.children);
+                      const idx = sibs.indexOf(n);
+                      if (idx < 0 || idx >= sibs.length - 1)
+                        continue;
+                      for (let j = idx + 1; j < sibs.length; j++) {
+                        const nx = sibs[j];
+                        if (!isVisible(nx))
+                          continue;
+                        const t = (nx.textContent || "").replace(/\s+/g, "");
+                        if (!t || t.length > 24 || !/^\d/.test(t))
+                          continue;
+                        nx.click();
+                        return t;
+                      }
+                    }
+                  } catch (e2) {
+                  }
+                  return null;
+                };
+                const sigBefore = pageSig();
                 let how = tryNext();
+                if (how) {
+                  await sleep(1.6);
+                  if (thisTaskId !== currentWatchIframeTaskId || !context.isCurrent())
+                    return;
+                  if (pageSig() === sigBefore) {
+                    logStore.addLog(`[诊断] 已点击「下一节」但页面未变化，尝试切换下一个卡片/标签`, "warning");
+                    let card = clickNextCard(document);
+                    if (!card) {
+                      try {
+                        const frames = Array.from(document.querySelectorAll("iframe"));
+                        for (let i2 = 0; i2 < frames.length; i2++) {
+                          let doc = null;
+                          try {
+                            doc = frames[i2].contentDocument;
+                          } catch (e2) {
+                            doc = null;
+                          }
+                          if (!doc)
+                            continue;
+                          card = clickNextCard(doc);
+                          if (card)
+                            break;
+                        }
+                      } catch (e2) {
+                      }
+                    }
+                    if (card) {
+                      how = `卡片「${card}」`;
+                      await sleep(1.4);
+                    } else {
+                      how = null;
+                    }
+                  }
+                }
                 if (!how) {
                   await sleep(2.5);
                   if (thisTaskId === currentWatchIframeTaskId && context.isCurrent())
@@ -6334,6 +6413,12 @@
         const ended = () => {
           if (quiz == null ? void 0 : quiz.hasActiveQuiz())
             return;
+          try {
+            const doneSrc = (mediaElement == null ? void 0 : mediaElement.currentSrc) || (mediaElement == null ? void 0 : mediaElement.src) || "";
+            if (doneSrc)
+              completedVideoSrcs.add(doneSrc);
+          } catch (e2) {
+          }
           if (context.isCurrent())
             logStore.addLog(`${mediaType}已播放完成`, "success");
           finish();
@@ -6614,6 +6699,10 @@
             isExecuted = true;
             try {
               const mediaSrc = mediaElement.currentSrc || mediaElement.src || "(无 src)";
+              if (mediaSrc !== "(无 src)" && completedVideoSrcs.has(mediaSrc)) {
+                logStore.addLog(`[诊断] 该视频本页已播放完成，跳过重播`, "success");
+                return finish();
+              }
               logStore.addLog(`[诊断] 已找到 <${mediaType}>（src=${String(mediaSrc).slice(0, 90)}），准备播放`, "primary");
               // 不再强行 pause()：若播放器已自行开始播放，这里 pause 再 play 会与其状态机打架（AbortError 的常见来源）
               mediaElement.muted = true;
