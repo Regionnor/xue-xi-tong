@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.31
+// @version      1.32
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6047,8 +6047,15 @@
     const HOME_TAB_NAME = "0";
     const ANSWER_TAB_NAME2 = "1";
     const PDF_COMPLETION_WAIT_SECONDS = 5;
+    // 是否允许「自动拖到结尾前 5 秒」快速刷完。
+    // 超星多数任务点要求「观看时长 ≥ 90%」，跳进度会被判为未完成并把视频复位重播，
+    // 表现为「播完 → 又从头播 → 再跳到末尾 → 才进下一个」。默认关闭，改为倍速正常播完。
+    // 若你的课程确实允许跳转、想快速刷长视频，把这里改成 true 即可。
+    const ENABLE_AUTO_SEEK = false;
     let runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
     let processedIframeDocuments = /* @__PURE__ */ new WeakSet();
+    // 记录「已经拖拽过 / 已确认拖拽无效」的视频 src：同一个视频只跳一次，避免播完又跳、跳完又播的循环
+    let seekedVideoSrcs = /* @__PURE__ */ new Set();
     let currentPage;
     let chapterController = new AbortController();
     let currentWatchIframeTaskId = 0;
@@ -6091,6 +6098,7 @@
         ++currentWatchIframeTaskId;
         runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
         processedIframeDocuments = /* @__PURE__ */ new WeakSet();
+        seekedVideoSrcs = /* @__PURE__ */ new Set();
         questionStore.clearQuestion();
         currentPage = page;
         (_b = page.iframe) == null ? void 0 : _b.addEventListener("load", onRootIframeLoad);
@@ -6501,6 +6509,17 @@
               logStore.addLog(`[诊断] 视频尚未开始播放，暂不拖拽进度条`, "primary");
               return;
             }
+            if (!ENABLE_AUTO_SEEK) {
+              logStore.addLog(`[诊断] 已关闭自动拖拽（避免播完重播），按当前倍速正常播完`, "primary");
+              return;
+            }
+            const seekSrcKey = video.currentSrc || video.src || "";
+            if (seekSrcKey && seekedVideoSrcs.has(seekSrcKey)) {
+              logStore.addLog(`[诊断] 该视频已跳转过一次，本次不再拖拽（避免播完又跳、跳完又播）`, "primary");
+              return;
+            }
+            if (seekSrcKey)
+              seekedVideoSrcs.add(seekSrcKey);
             let duration = 0;
             try {
               duration = video.duration;
@@ -6546,7 +6565,7 @@
               if (now >= target - 2) {
                 logStore.addLog(`已拖拽进度条至结束前约 ${secondsBeforeEnd}s（当前 ${now.toFixed(0)}s / 共 ${duration.toFixed(0)}s），等待播放完成`, "success");
               } else if (now <= before + 1) {
-                logStore.addLog(`进度条无法拖动（已被复位），转为正常高倍速播放直至完成`, "warning");
+                logStore.addLog(`进度条无法拖动（已被复位），转为正常高倍速播放直至完成（本视频不再尝试跳转）`, "warning");
               } else {
                 logStore.addLog(`进度条已跳转至 ${now.toFixed(0)}s（目标 ${target.toFixed(0)}s）`, "primary");
               }
