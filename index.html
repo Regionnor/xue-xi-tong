@@ -328,7 +328,7 @@
       <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。</p></div>
       <div class="card"><h3><span class="dot"></span>视频自动播放与切换</h3><p>自动定位任务点视频（含多层 iframe 兜底查找）并播放，看完自动进入下一章节。</p></div>
       <div class="card"><h3><span class="dot"></span>文档 / PPT 自动阅读</h3><p>递归进入嵌套 iframe，滑动到真正的内容渲染层，自动完成文档、PDF 的阅读任务点。</p></div>
-      <div class="card"><h3><span class="dot"></span>视频智能加速</h3><p>自动选取播放器允许的最高倍速（默认 2x，课程开放更高则取更高）。默认不自动跳进度：超星多数任务点要求观看时长 ≥ 90%，跳转会被判未完成并重播；确有需要可在脚本内开启 <code>ENABLE_AUTO_SEEK</code>。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频智能加速</h3><p>自动选取播放器允许的最高倍速（默认 2x，课程开放更高则取更高），并支持拖到结尾前几秒快速完成；同一视频只会跳一次，避免「播完又跳」的重复。教师禁止拖动时回退高倍速播放。</p></div>
       <div class="card"><h3><span class="dot"></span>覆盖主要场景</h3><p>视频任务点、章节测试、作业、考试均可自动完成；支持自动提交与正确率阈值策略。</p></div>
       <div class="card"><h3><span class="dot"></span>运行日志与导出</h3><p>「首页」实时显示运行日志，可滚动查看，并支持一键导出为 <code>.txt</code>，方便排查问题。</p></div>
       <div class="card"><h3><span class="dot"></span>轻量原生面板</h3><p>面板已移除 ElementPlus，全部原生实现；页面加载只创建一个悬浮按钮，点击才挂载，打开不卡、点击不卡。</p></div>
@@ -548,7 +548,7 @@
       <summary>视频不加速 / 不会自动跳到末尾</summary>
       <div class="ans">
         <p>倍速上限由播放器开放程度决定：脚本优先读取播放器速度菜单的最高档，读不到就直接尝试 2x，仍不生效则降级到 1.75 / 1.5 / 1.25。部分课程会禁用倍速，此时脚本会保持 1x 正常播放。</p>
-        <p><strong>1.32 起默认不再自动拖动进度条</strong>：超星多数任务点要求「观看时长 ≥ 90%」，跳进度会被判为未完成并导致视频复位重播（表现为「播完又从头播、再跳到末尾」）。确实允许跳转的课程，可在脚本内把 <code>ENABLE_AUTO_SEEK</code> 改为 <code>true</code>。</p>
+        <p>脚本会把进度拖到结尾前 5 秒。若某门课要求「观看时长 ≥ 90%」，跳转可能被判未完成并导致视频复位重播（表现为「播完又从头播、再跳到末尾」）；遇到这种情况可把脚本内 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，改为纯倍速播完。同一视频在本次章节内只会跳一次。</p>
       </div>
     </details>
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.32
+// @version      1.33
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6047,11 +6047,10 @@
     const HOME_TAB_NAME = "0";
     const ANSWER_TAB_NAME2 = "1";
     const PDF_COMPLETION_WAIT_SECONDS = 5;
-    // 是否允许「自动拖到结尾前 5 秒」快速刷完。
-    // 超星多数任务点要求「观看时长 ≥ 90%」，跳进度会被判为未完成并把视频复位重播，
-    // 表现为「播完 → 又从头播 → 再跳到末尾 → 才进下一个」。默认关闭，改为倍速正常播完。
-    // 若你的课程确实允许跳转、想快速刷长视频，把这里改成 true 即可。
-    const ENABLE_AUTO_SEEK = false;
+    // 是否允许「自动拖到结尾前 5 秒」快速刷完。默认开启。
+    // 注意：超星部分任务点要求「观看时长 ≥ 90%」，跳进度可能被判未完成并复位重播；
+    // 若遇到这种情况，可把这里改成 false，改为只按倍速正常播完。
+    const ENABLE_AUTO_SEEK = true;
     let runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
     let processedIframeDocuments = /* @__PURE__ */ new WeakSet();
     // 记录「已经拖拽过 / 已确认拖拽无效」的视频 src：同一个视频只跳一次，避免播完又跳、跳完又播的循环
