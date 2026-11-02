@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.27
+// @version      1.28
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6189,6 +6189,7 @@
         let mediaElement = null;
         let quiz;
         let resuming = false;
+        let resumeFailures = 0;
         const cleanup = () => {
           clearInterval(intervalId2);
           quiz == null ? void 0 : quiz.dispose();
@@ -6225,9 +6226,21 @@
               return finish();
             if ((quiz == null ? void 0 : quiz.hasActiveQuiz()) || (mediaElement == null ? void 0 : mediaElement.ended))
               return;
-            await (mediaElement == null ? void 0 : mediaElement.play());
-          } catch (error) {
-            fail(error);
+            try {
+              await (mediaElement == null ? void 0 : mediaElement.play());
+              resumeFailures = 0;
+            } catch (playError) {
+              resumeFailures++;
+              if (resumeFailures <= 8) {
+                logStore.addLog(`[诊断] 恢复播放失败（${String((playError == null ? void 0 : playError.name) || playError)}），稍后重试`, "warning");
+                setTimeout(() => {
+                  if (!settled)
+                    void resume();
+                }, 1500);
+              } else {
+                fail(playError);
+              }
+            }
           } finally {
             resuming = false;
           }
@@ -6288,6 +6301,20 @@
             return;
           }
           try {
+            // 部分课程/任务点要求「观看时长 ≥ 90%」时，播放器会禁用倍速与拖拽（页面会提示"不可倍速、不可拖拽"）。
+            // 此时强行改 playbackRate / seek 会被播放器判为违规并把播放暂停，因此检测到限制就按 1x 正常播放。
+            try {
+              const restrictText = ((document.documentElement && document.documentElement.textContent) || "") + "\n" + ((iframeDocument && iframeDocument.documentElement && iframeDocument.documentElement.textContent) || "");
+              if (/不可倍速|不可拖拽|无法拖动进度条|禁止拖动|禁止倍速/.test(restrictText)) {
+                logStore.addLog("检测到该任务点限制倍速/拖拽（需满足观看时长），保持 1x 正常播放", "warning");
+                try {
+                  video.playbackRate = 1;
+                } catch (e2) {
+                }
+                return;
+              }
+            } catch (e2) {
+            }
             let chosen = null;
             const detectMenuMax = () => {
               try {
@@ -6337,12 +6364,18 @@
             } catch (e2) {
             }
             logStore.addLog(`已设置倍速：${chosen}x（取播放器可选上限，避免超出导致播放失败）`, "primary");
+            let reassertCount = 0;
             const reassert = () => {
               if (isFinishedTask(iframe) || !context.isCurrent())
                 return;
+              // 播放器若反复把速度改回 1x，最多纠正 3 次就放弃，避免和播放器来回抢导致播放抖动/暂停
+              if (reassertCount >= 3)
+                return;
               try {
-                if (video.playbackRate < chosen)
+                if (video.playbackRate < chosen) {
+                  reassertCount++;
                   video.playbackRate = chosen;
+                }
               } catch (e2) {
               }
             };
@@ -6499,19 +6532,66 @@
                   log: (message, type) => logStore.addLog(message, type)
                 });
               }
-              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
+              const clickPlayButton = () => {
                 try {
-                  await mediaElement.play();
-                } catch (playError) {
-                  logStore.addLog(`[诊断] play() 被拒绝（${String((playError == null ? void 0 : playError.name) || playError)}），改尝试点击播放按钮`, "warning");
+                  const ownerDoc = mediaElement.ownerDocument || iframeDocument;
+                  const btn = ownerDoc.querySelector(".vjs-big-play-button, .prism-big-play-btn, .playButton, .vjs-play-control, .prism-play-btn, [class*='big-play'], [class*='play-btn'], [class*='playBtn']");
+                  if (btn) {
+                    btn.click();
+                    return true;
+                  }
+                } catch (e2) {
                 }
-                if (mediaElement.paused) {
+                return false;
+              };
+              const waitCanPlay = async () => {
+                if (mediaElement.readyState >= 2)
+                  return true;
+                await new Promise((resolve2) => {
+                  let done = false;
+                  const finishWait = () => {
+                    if (done)
+                      return;
+                    done = true;
+                    try {
+                      mediaElement.removeEventListener("loadeddata", finishWait);
+                      mediaElement.removeEventListener("canplay", finishWait);
+                    } catch (e2) {
+                    }
+                    resolve2(true);
+                  };
                   try {
-                    const ownerDoc = mediaElement.ownerDocument || iframeDocument;
-                    const btn = ownerDoc.querySelector(".vjs-big-play-button, .prism-big-play-btn, .playButton, .vjs-play-control, .prism-play-btn");
-                    if (btn)
-                      btn.click();
+                    mediaElement.addEventListener("loadeddata", finishWait, { once: true });
+                    mediaElement.addEventListener("canplay", finishWait, { once: true });
                   } catch (e2) {
+                  }
+                  setTimeout(finishWait, 3e3);
+                });
+                return mediaElement.readyState >= 2;
+              };
+              if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
+                for (let attempt = 0; attempt < 4; attempt++) {
+                  if (settled || (quiz == null ? void 0 : quiz.hasActiveQuiz()))
+                    break;
+                  await waitCanPlay();
+                  if (settled)
+                    break;
+                  const startTime = mediaElement.currentTime || 0;
+                  try {
+                    await mediaElement.play();
+                  } catch (playError) {
+                    logStore.addLog(`[诊断] play() 被拒绝（${String((playError == null ? void 0 : playError.name) || playError)}），第 ${attempt + 1} 次尝试点击播放按钮`, "warning");
+                    clickPlayButton();
+                  }
+                  await sleep(1200);
+                  if (settled)
+                    break;
+                  const progressed = (mediaElement.currentTime || 0) > startTime + 0.2;
+                  if (!mediaElement.paused && progressed)
+                    break;
+                  if (attempt < 3) {
+                    logStore.addLog(`[诊断] 播放未推进（paused=${mediaElement.paused}，current=${(mediaElement.currentTime || 0).toFixed(1)}s，readyState=${mediaElement.readyState}），准备第 ${attempt + 2} 次重试`, "warning");
+                    clickPlayButton();
                   }
                 }
               }
@@ -6523,7 +6603,7 @@
                 return finish();
               if (!(quiz == null ? void 0 : quiz.hasActiveQuiz())) {
                 if (mediaElement.paused) {
-                  logStore.addLog(`[诊断] 视频仍未开始播放（可能被浏览器自动播放策略拦截），请先在页面或视频上点一下以授权后刷新重试`, "warning");
+                  logStore.addLog(`[诊断] 视频仍未开始播放（可能被自动播放策略拦截，或该任务点限制倍速/拖拽），请在视频上点一下播放或刷新重试`, "warning");
                 } else {
                   logStore.addLog("播放成功", "success");
                 }
