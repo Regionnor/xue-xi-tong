@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.34
+// @version      1.35
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6295,6 +6295,17 @@
                       how = `卡片「${card}」`;
                       await sleep(1.4);
                     } else {
+                      let actives = [];
+                      try {
+                        const nodes = document.querySelectorAll("[class*='active'],[class*='cur'],[aria-selected='true']");
+                        for (let k = 0; k < nodes.length && actives.length < 8; k++) {
+                          const t = (nodes[k].textContent || "").replace(/\s+/g, "");
+                          if (t && t.length <= 20 && isVisible(nodes[k]))
+                            actives.push(t);
+                        }
+                      } catch (e2) {
+                      }
+                      logStore.addLog(`[诊断] 未找到可切换的卡片；当前激活元素文案：${actives.join("、") || "(无)"}`, "warning");
                       how = null;
                     }
                   }
