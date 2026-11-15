@@ -8,6 +8,21 @@
 
 ---
 
+## [1.36] - 2026-11-16
+
+### 🔧 变更 (Changed) - 2026-11-16
+- **DeepSeek 模型名与接口地址同步官方最新文档**：官方「首次调用 API」/「Models & Pricing」目前只列出 `deepseek-flash`（DeepSeek-V4.1-Flash）与 `deepseek-v4-pro`（DeepSeek-V4-Pro），旧版 chat 模型名已下线，继续填写会被判「模型不存在」。
+  - 面板模型框占位提示改为 `AI 模型，如 gpt-4o-mini / deepseek-flash`；**选中 DeepSeek 预设时**动态显示 `DeepSeek 模型：deepseek-flash / deepseek-v4-pro`，直接告诉用户可用模型名（该 props 已加入编译更新的动态属性列表，切换预设会实时刷新）。
+  - 地址框占位提示补充 `https://api.deepseek.com` 写法；README 与在线说明文档中的示例、字段说明、内置预设表全部同步。
+- **预设地址改为官方写法**：`DeepSeek (深度求索)` 由 `https://api.deepseek.com/v1` 改为 `https://api.deepseek.com`（不带 `/v1`）。脚本内部会拼接 `/chat/completions`，与官方 curl 示例 `https://api.deepseek.com/chat/completions` 一致；其余预设不变。
+
+### 🛠 修复 (Fixed) - 2026-11-16
+- **修复「选了 DeepSeek 预设后测试连接 / 答题提示模型不存在」**：v1.13 起预设只填地址、会把模型字段清空，而「测试连接」与 AI 答题请求在模型为空时都硬兜底成 `gpt-4o-mini`，等于把 OpenAI 的模型名发给 DeepSeek。
+  - 新增 `defaultModelFor(baseUrl)`：命中 `api.deepseek.com` 时兜底 `deepseek-flash`，其余服务仍兜底 `gpt-4o-mini`，不改变其他服务商行为。
+  - 显式填写模型名时完全以用户填写为准。
+
+---
+
 ## [1.35] - 2026-11-02
 
 ### 🩺 诊断 (Diagnostics) - 2026-11-02
@@ -235,7 +250,7 @@
 ## [1.13] - 2026-10-28
 
 ### 🔧 调整 (Changed) - 2026-10-28
-- **预设接口源不再预填「模型」，仅填「地址」**：根据反馈，各厂商 / 账户可用的模型名差异较大，预设下拉（OpenAI / DeepSeek / 通义千问 / 豆包 / Kimi / 小米 MiMo / 空白）现只一键填好接口地址，模型字段留空由用户自行填写（占位提示：`AI 模型，如 gpt-4o-mini / deepseek-chat`）。选任一项会同步清空模型框，避免沿用旧模型导致不匹配。
+- **预设接口源不再预填「模型」，仅填「地址」**：根据反馈，各厂商 / 账户可用的模型名差异较大，预设下拉（OpenAI / DeepSeek / 通义千问 / 豆包 / Kimi / 小米 MiMo / 空白）现只一键填好接口地址，模型字段留空由用户自行填写（占位提示：`AI 模型，如 gpt-4o-mini / deepseek-chat`——此为当时的示例，该模型名现已下线，见 [1.36]）。选任一项会同步清空模型框，避免沿用旧模型导致不匹配。
 
 ---
 
@@ -244,7 +259,7 @@
 ### ✨ 新增 (Added) - 2026-10-17
 - **AI 接口「预设接口源」下拉框**：在「答题」设置 → AI 接口答题区，地址输入框上方新增一个 `el-select` 预设源，选一项即可一键填好「地址」与「模型」：
   - `OpenAI (GPT)` → `https://api.openai.com/v1` / `gpt-4o-mini`
-  - `DeepSeek (深度求索)` → `https://api.deepseek.com/v1` / `deepseek-chat`
+  - `DeepSeek (深度求索)` → `https://api.deepseek.com/v1` / `deepseek-chat`（历史记录；地址与模型名已于 [1.36] 更新）
   - `通义千问 (Qwen)` → `https://dashscope.aliyuncs.com/compatible-mode/v1` / `qwen-plus`
   - `豆包 (火山方舟)` → `https://ark.cn-beijing.volces.com/api/v3` / `doubao-seed-1-6-250615`
   - `Kimi (月之暗面)` → `https://api.moonshot.cn/v1` / `moonshot-v1-8k`

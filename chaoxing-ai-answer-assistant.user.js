@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.35
+// @version      1.36
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -811,6 +811,9 @@
   const sleep = (second) => {
     return new Promise((resolve) => setTimeout(resolve, second * 1e3));
   };
+  // DeepSeek 官方当前只提供 deepseek-flash / deepseek-v4-pro，旧版 chat 模型名已下线。
+  // 预设会清空模型字段，这里按接口地址给一个可用的兜底模型，避免把 gpt-4o-mini 发给 DeepSeek。
+  const defaultModelFor = (baseUrl) => /api\.deepseek\.com/i.test(String(baseUrl || "")) ? "deepseek-flash" : "gpt-4o-mini";
   const AI_TYPE_DESC = {
     "0": "单选题",
     "1": "多选题",
@@ -902,7 +905,7 @@
       "Authorization": "Bearer " + (aiConfig.apiKey || "").trim()
     };
     const body = JSON.stringify({
-      model: aiConfig.model || "gpt-4o-mini",
+      model: aiConfig.model || defaultModelFor(aiConfig.baseUrl),
       messages: [
         { role: "system", content: "你是专业的网课答题助手，回答准确、简洁、直接。" },
         { role: "user", content: prompt }
@@ -1148,7 +1151,7 @@
       const configStore = useConfigStore();
       const aiPresets = [
         { label: "OpenAI (GPT)", value: "openai", baseUrl: "https://api.openai.com/v1", model: "" },
-        { label: "DeepSeek (深度求索)", value: "deepseek", baseUrl: "https://api.deepseek.com/v1", model: "" },
+        { label: "DeepSeek (深度求索)", value: "deepseek", baseUrl: "https://api.deepseek.com", model: "" },
         { label: "通义千问 (Qwen)", value: "qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "" },
         { label: "豆包 (火山方舟)", value: "doubao", baseUrl: "https://ark.cn-beijing.volces.com/api/v3", model: "" },
         { label: "Kimi (月之暗面)", value: "kimi", baseUrl: "https://api.moonshot.cn/v1", model: "" },
@@ -1181,7 +1184,7 @@
         const url = baseUrl + "/chat/completions";
         const headers = { "Content-Type": "application/json", "Authorization": "Bearer " + (cfg.apiKey || "").trim() };
         const body = JSON.stringify({
-          model: cfg.model || "gpt-4o-mini",
+          model: cfg.model || defaultModelFor(cfg.baseUrl),
           messages: [{ role: "user", content: "ping" }],
           max_tokens: 5,
           temperature: 0
@@ -1255,7 +1258,7 @@
             vue.createElementVNode("input", {
               class: "mp-input",
               value: ai.baseUrl,
-              placeholder: "AI 接口地址，如 https://api.openai.com/v1",
+              placeholder: "AI 接口地址，如 https://api.openai.com/v1 / https://api.deepseek.com",
               onInput: function ($event) { ai.baseUrl = $event.target.value; }
             }, null, 8, ["value", "onInput"])
           ]),
@@ -1274,9 +1277,9 @@
             vue.createElementVNode("input", {
               class: "mp-input",
               value: ai.model,
-              placeholder: "AI 模型，如 gpt-4o-mini / deepseek-chat",
+              placeholder: /api\.deepseek\.com/i.test(String(ai.baseUrl || "")) ? "DeepSeek 模型：deepseek-flash / deepseek-v4-pro" : "AI 模型，如 gpt-4o-mini / deepseek-flash",
               onInput: function ($event) { ai.model = $event.target.value; }
-            }, null, 8, ["value", "onInput"])
+            }, null, 8, ["value", "placeholder", "onInput"])
           ]),
           vue.createElementVNode("div", { class: "mp-field" }, [
             vue.createElementVNode("span", { class: "mp-label" }, "要求"),

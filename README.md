@@ -6,14 +6,14 @@
 
 > 在线说明文档：<https://regionnor.github.io/xue-xi-tong/>
 >
-> 当前版本：**v1.35**（2026-11-02），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
+> 当前版本：**v1.36**（2026-11-16），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ---
 
 ## ✨ 特性
 
 - **AI 答题**：对接任意 OpenAI 兼容格式的 AI 接口（OpenAI / DeepSeek / 通义千问 / 本地 Ollama 等）。在脚本面板「答题」设置中填写接口地址、API Key、模型即可自动作答。
-- **AI 预设接口源 + 一键测试**：「答题」设置中提供预设下拉（OpenAI / DeepSeek / 通义千问 / 豆包 / Kimi / 小米 MiMo / 空白），选一项即可填好接口地址（模型留空由你自行填写）；填完后点「测试连接」，用极简 `ping` 请求验证地址 / 密钥 / 模型是否可用，并实时显示成功或失败原因。
+- **AI 预设接口源 + 一键测试**：「答题」设置中提供预设下拉（OpenAI / DeepSeek / 通义千问 / 豆包 / Kimi / 小米 MiMo / 空白），选一项即可填好接口地址（模型留空由你自行填写）；DeepSeek 预设填入官方地址 `https://api.deepseek.com`，模型填 `deepseek-flash` 或 `deepseek-v4-pro`（旧版 chat 模型名已下线，v1.36 起模型框留空会兜底为 `deepseek-flash`）；填完后点「测试连接」，用极简 `ping` 请求验证地址 / 密钥 / 模型是否可用，并实时显示成功或失败原因。
 - **全题型支持**：单选、多选、判断、填空、简答，脚本会把题干与选项发给你的 AI，并解析回复后自动填入。
 - **覆盖主要学习场景**：视频播放、章节测试、作业与考试自动完成。
 - **专注超星学习通**：已移除原版的知到智慧树（zhihuishu）相关代码，仅保留并专注于超星学习通。
@@ -49,9 +49,9 @@
 4. 填写以下信息：
    | 配置项 | 说明 | 示例 |
    | --- | --- | --- |
-   | 接口地址 (baseUrl) | OpenAI 兼容的 `/v1` 基址 | `https://api.openai.com/v1`、`https://api.deepseek.com/v1`、`http://localhost:11434/v1` |
+   | 接口地址 (baseUrl) | OpenAI 兼容基址（DeepSeek 官方不带 `/v1`） | `https://api.openai.com/v1`、`https://api.deepseek.com`、`http://localhost:11434/v1` |
    | API Key | 你的接口密钥 | `sk-xxxx` |
-   | 模型 (model) | 调用的模型名 | `gpt-4o-mini`、`deepseek-chat` |
+   | 模型 (model) | 调用的模型名；DeepSeek 目前仅 `deepseek-flash` / `deepseek-v4-pro` | `gpt-4o-mini`、`deepseek-flash`、`deepseek-v4-pro` |
    | 温度 (temperature) | 可选，默认 0.2 | `0.2` |
    | 自定义提示词 | 可选，追加给 AI 的额外要求 | `只用中文回答` |
 5. 刷新页面后即可在视频、章节测试、作业、考试页面自动调用 AI 作答。

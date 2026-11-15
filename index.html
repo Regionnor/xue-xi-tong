@@ -275,9 +275,9 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.35</span>
+      <span class="badge solid">v1.36</span>
       <span class="badge">用户脚本 / Userscript</span>
-      <span class="badge">最近更新 2026-11-02</span>
+      <span class="badge">最近更新 2026-11-16</span>
       <span class="badge">MIT License</span>
       <span class="badge">仅超星学习通</span>
     </div>
@@ -386,7 +386,7 @@
       <div class="step">
         <div>
           <h4>填写接口地址、密钥、模型</h4>
-          <p>可先从下拉选择预设，自动填好接口地址；模型通常需要自己填写（如 <code>gpt-4o-mini</code>、<code>deepseek-chat</code>）。</p>
+          <p>可先从下拉选择预设，自动填好接口地址；模型通常需要自己填写（如 <code>gpt-4o-mini</code>；DeepSeek 用 <code>deepseek-flash</code> 或 <code>deepseek-v4-pro</code>）。选中 DeepSeek 预设时，模型框会直接提示这两个模型名。</p>
         </div>
       </div>
       <div class="step"><div><h4>点「测试连接」验证</h4><p>脚本会发一个极简 ping 请求，成功会显示「连接成功（HTTP 200）」，失败会给出 HTTP 状态或网络 / 跨域原因。</p></div></div>
@@ -398,9 +398,9 @@
       <table>
         <thead><tr><th>配置项</th><th>说明</th><th>示例</th></tr></thead>
         <tbody>
-          <tr><td>接口地址 baseUrl</td><td>OpenAI 兼容的 <code>/v1</code> 基址</td><td><code>https://api.openai.com/v1</code></td></tr>
+          <tr><td>接口地址 baseUrl</td><td>OpenAI 兼容的接口基址；多数服务带 <code>/v1</code>，DeepSeek 官方不带</td><td><code>https://api.openai.com/v1</code>、<code>https://api.deepseek.com</code></td></tr>
           <tr><td>API Key</td><td>你的接口密钥</td><td><code>sk-xxxx</code></td></tr>
-          <tr><td>模型 model</td><td>要调用的模型名</td><td><code>deepseek-chat</code>、<code>gpt-4o-mini</code></td></tr>
+          <tr><td>模型 model</td><td>要调用的模型名；DeepSeek 目前仅 <code>deepseek-flash</code> / <code>deepseek-v4-pro</code></td><td><code>deepseek-flash</code>、<code>deepseek-v4-pro</code>、<code>gpt-4o-mini</code></td></tr>
           <tr><td>要求 customInstruction</td><td>可选，附加给 AI 的额外答题要求</td><td>例如「只输出答案」</td></tr>
         </tbody>
       </table>
@@ -409,19 +409,19 @@
     <h3 style="margin:26px 0 6px;font-size:16px;">内置预设</h3>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>预设</th><th>自动填入的接口地址</th></tr></thead>
+        <thead><tr><th>预设</th><th>自动填入的接口地址</th><th>模型 / 备注</th></tr></thead>
         <tbody>
-          <tr><td>OpenAI (GPT)</td><td><code>https://api.openai.com/v1</code></td></tr>
-          <tr><td>DeepSeek (深度求索)</td><td><code>https://api.deepseek.com/v1</code></td></tr>
-          <tr><td>通义千问 (Qwen)</td><td><code>https://dashscope.aliyuncs.com/compatible-mode/v1</code></td></tr>
-          <tr><td>豆包 (火山方舟)</td><td><code>https://ark.cn-beijing.volces.com/api/v3</code></td></tr>
-          <tr><td>Kimi (月之暗面)</td><td><code>https://api.moonshot.cn/v1</code></td></tr>
-          <tr><td>小米 MiMo</td><td><code>https://api.xiaomimimo.com/v1</code></td></tr>
-          <tr><td>空白（自定义）</td><td>清空地址，自行填写</td></tr>
+          <tr><td>OpenAI (GPT)</td><td><code>https://api.openai.com/v1</code></td><td>按账户可用模型填写，如 <code>gpt-4o-mini</code></td></tr>
+          <tr><td>DeepSeek (深度求索)</td><td><code>https://api.deepseek.com</code>（官方写法<strong>不带</strong> <code>/v1</code>）</td><td><code>deepseek-flash</code> 或 <code>deepseek-v4-pro</code></td></tr>
+          <tr><td>通义千问 (Qwen)</td><td><code>https://dashscope.aliyuncs.com/compatible-mode/v1</code></td><td>按服务商文档填写</td></tr>
+          <tr><td>豆包 (火山方舟)</td><td><code>https://ark.cn-beijing.volces.com/api/v3</code></td><td>按服务商文档填写</td></tr>
+          <tr><td>Kimi (月之暗面)</td><td><code>https://api.moonshot.cn/v1</code></td><td>按服务商文档填写</td></tr>
+          <tr><td>小米 MiMo</td><td><code>https://api.xiaomimimo.com/v1</code></td><td>按服务商文档填写</td></tr>
+          <tr><td>空白（自定义）</td><td>清空地址，自行填写</td><td>模型同样自行填写</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="note">预设只填「接口地址」，模型名需按你所使用的服务自行填写；本地 Ollama 可用 <code>http://localhost:11434/v1</code>，模型填 <code>qwen2.5</code> 之类。</div>
+    <div class="note">预设只填「接口地址」，模型名需按你所使用的服务自行填写；本地 Ollama 可用 <code>http://localhost:11434/v1</code>，模型填 <code>qwen2.5</code> 之类。v1.36 起模型留空时会按地址兜底：DeepSeek 用 <code>deepseek-flash</code>，其余用 <code>gpt-4o-mini</code>；仍建议显式填写模型名。</div>
   </section>
 
   <section id="usage">
@@ -541,10 +541,19 @@
     </details>
 
     <details>
+      <summary>DeepSeek 该填哪个模型？为什么旧模型名用不了？</summary>
+      <div class="ans">
+        <p>DeepSeek 官方文档目前<strong>只提供两个模型</strong>：<code>deepseek-flash</code>（DeepSeek-V4.1-Flash）与 <code>deepseek-v4-pro</code>（DeepSeek-V4-Pro）。旧版 chat 系列模型名已下线，填了会返回「模型不存在 / Model Not Exists」。</p>
+        <p>官方 OpenAI 格式地址是 <code>https://api.deepseek.com</code>（<strong>不带 <code>/v1</code></strong>），脚本会自动拼接 <code>/chat/completions</code>。v1.36 起选中 DeepSeek 预设即填入该地址，模型框也会直接提示这两个模型名。</p>
+        <p>模型框留空时，v1.36 起会自动兜底为 <code>deepseek-flash</code>；旧版本会错误地把 <code>gpt-4o-mini</code> 发给 DeepSeek，导致「测试连接」与答题都失败。</p>
+      </div>
+    </details>
+
+    <details>
       <summary>「测试连接」失败：请求出错 / 超时 / 返回异常</summary>
       <div class="ans">
         <ul>
-          <li>接口地址需为 OpenAI 兼容的 <code>/v1</code> 基址，不要带 <code>/chat/completions</code>。</li>
+          <li>多数服务需填 OpenAI 兼容的 <code>/v1</code> 基址（如 <code>https://api.openai.com/v1</code>）；DeepSeek 官方写法是 <code>https://api.deepseek.com</code>（不带 <code>/v1</code>）。都不要带 <code>/chat/completions</code>，脚本会自动拼接。</li>
           <li>确认 API Key 正确、未过期，且账户有额度。</li>
           <li>确认模型名与所填接口匹配（不同服务商模型名不同）。</li>
           <li>超时时间为 20 秒；网络不稳定或被墙时可能失败，可换网络重试。</li>
@@ -615,8 +624,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.35（2026-11-02）。v1.28–v1.35 集中修复视频播放与自动推进链路。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.36（2026-11-16）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.36</span><p>DeepSeek 模型改为官方在售的 <code>deepseek-flash</code> / <code>deepseek-v4-pro</code>，预设地址改为 <code>https://api.deepseek.com</code>；修复预设清空模型后把 <code>gpt-4o-mini</code> 发给 DeepSeek 的兜底错误。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.35</span><p>卡片切换失败时输出当前激活态元素文案（最多 8 个），便于按真实标签结构补规则；仅诊断，无行为变更。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.34</span><p>修复「视频播完不进入下一个视频」：点击后校验页面签名，未变化则切换 <code>1 Case 1 / 2 Case 2</code> 章节卡片标签；新增已播完视频记录，跳过复位重播。</p></div>
       <div class="tl-item"><span class="tl-ver">v1.33</span><p>按用户要求恢复自动拖到结尾前 5 秒（默认开启），保留「同一视频只跳一次」。</p></div>
@@ -658,7 +668,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.35 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.36 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
