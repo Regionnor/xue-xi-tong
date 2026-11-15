@@ -8,6 +8,15 @@
 
 ---
 
+## [1.37] - 2026-11-16
+
+### 🔧 变更 (Changed) - 2026-11-16
+- **移除 `*.edu.cn` 生效域名**：按用户要求，脚本不再通过 `@match` 在 `*.edu.cn` 域名下注入，避免在非超星的学校网站触发。
+  - 同步更新在线文档「生效域名」与 README 的域名列表。
+  - 注意：若有学校的课程平台部署在 `xxx.edu.cn` 域名下且需要脚本，需在脚本头手动加回 `@match *://*.edu.cn/*`。
+
+---
+
 ## [1.36] - 2026-11-16
 
 ### 🔧 变更 (Changed) - 2026-11-16
@@ -410,7 +419,7 @@
 - 单个 iframe 任务点处理异常不再中断整批任务：改为记录警告日志后继续处理下一个任务点。
 
 ### 🌐 兼容性 (Compatibility)
-- `@match` 覆盖超星学习通相关域名：`*.chaoxing.com`、`*.edu.cn`、`*.nbdlib.cn`、`*.hnsyu.net`、`*.gdhkmooc.com`。
+- `@match` 覆盖超星学习通相关域名：`*.chaoxing.com`、`*.nbdlib.cn`、`*.hnsyu.net`、`*.gdhkmooc.com`（`*.edu.cn` 已于 [1.37] 移除）。
 - 适用环境：Tampermonkey / ScriptCat 等支持 `@require`、`@connect` 的 userscript 管理器。
 
 ---

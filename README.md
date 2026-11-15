@@ -6,7 +6,7 @@
 
 > 在线说明文档：<https://regionnor.github.io/xue-xi-tong/>
 >
-> 当前版本：**v1.36**（2026-11-16），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
+> 当前版本：**v1.37**（2026-11-16），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ---
 
@@ -65,7 +65,6 @@
 脚本通过 `@match` 在以下超星学习通相关域名生效：
 
 - `*.chaoxing.com`
-- `*.edu.cn`
 - `*.nbdlib.cn`
 - `*.hnsyu.net`
 - `*.gdhkmooc.com`
