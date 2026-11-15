@@ -275,8 +275,9 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.27</span>
+      <span class="badge solid">v1.35</span>
       <span class="badge">用户脚本 / Userscript</span>
+      <span class="badge">最近更新 2026-11-02</span>
       <span class="badge">MIT License</span>
       <span class="badge">仅超星学习通</span>
     </div>
@@ -311,6 +312,10 @@
       脚本在页面加载时只创建一个极轻量的悬浮按钮，点击后才挂载面板，因此不会拖慢超星页面；
       面板内部已完全不依赖 ElementPlus，全部使用原生组件实现，打开与点击都不再卡顿。
     </p>
+    <p>
+      v1.28–v1.35 集中修复了<strong>视频播放链路与章节自动推进</strong>：先确认视频真的在播放，再设倍速、再拖进度；
+      遇到课程禁用倍速或拖拽时自动保持 1x；播完后按选择器、可见文本、iframe、章节卡片标签多级兜底进入下一个任务点。
+    </p>
     <div class="chips">
       <span class="chip">OpenAI 兼容接口</span>
       <span class="chip">无题库依赖</span>
@@ -326,11 +331,12 @@
       <div class="card"><h3><span class="dot"></span>AI 自动答题</h3><p>对接任意 OpenAI 兼容接口（OpenAI、DeepSeek、通义千问、豆包、Kimi、小米 MiMo、本地 Ollama 等），把题干与选项发给你的 AI，解析回复后自动填入。</p></div>
       <div class="card"><h3><span class="dot"></span>全题型支持</h3><p>单选、多选、判断、填空、简答均可处理，不依赖任何题库与题库密钥。</p></div>
       <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。</p></div>
-      <div class="card"><h3><span class="dot"></span>视频自动播放与切换</h3><p>自动定位任务点视频（含多层 iframe 兜底查找）并播放，看完自动进入下一章节。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频自动播放与顺序保障</h3><p>等播放器就绪（<code>readyState ≥ 2</code>）再播放，并校验进度确实在推进；<strong>确认播起来之后</strong>才设倍速、才尝试拖拽。设速后若播放被中断会自动回退 1x，避免「画面动一下就停」。</p></div>
       <div class="card"><h3><span class="dot"></span>文档 / PPT 自动阅读</h3><p>递归进入嵌套 iframe，滑动到真正的内容渲染层，自动完成文档、PDF 的阅读任务点。</p></div>
-      <div class="card"><h3><span class="dot"></span>视频智能加速</h3><p>自动选取播放器允许的最高倍速（默认 2x，课程开放更高则取更高），并支持拖到结尾前几秒快速完成；同一视频只会跳一次，避免「播完又跳」的重复。教师禁止拖动时回退高倍速播放。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频智能加速与限制识别</h3><p>自动选取播放器允许的最高倍速（默认 2x），并可拖到结尾前几秒快速完成。任务点若标注「不可倍速 / 不可拖拽 / 观看时长 ≥ 90%」，自动保持 1x 且不拖进度；同一视频只跳一次，已播完的不再重播。</p></div>
+      <div class="card"><h3><span class="dot"></span>自动推进到下一任务</h3><p>视频播完 / 文档滑完后，按「固定选择器 → 页面可见文本 → iframe 内文本 → 章节卡片标签」逐级兜底进入下一节；点完会校验页面是否真的变了，没变就换下一种方式重试。</p></div>
       <div class="card"><h3><span class="dot"></span>覆盖主要场景</h3><p>视频任务点、章节测试、作业、考试均可自动完成；支持自动提交与正确率阈值策略。</p></div>
-      <div class="card"><h3><span class="dot"></span>运行日志与导出</h3><p>「首页」实时显示运行日志，可滚动查看，并支持一键导出为 <code>.txt</code>，方便排查问题。</p></div>
+      <div class="card"><h3><span class="dot"></span>运行日志与诊断导出</h3><p>「首页」实时显示运行日志（播放状态、倍速 / 拖拽结果、进入下一节的命中方式、卡片切换诊断等），可一键导出为 <code>.txt</code>，排查问题直接发日志即可。</p></div>
       <div class="card"><h3><span class="dot"></span>轻量原生面板</h3><p>面板已移除 ElementPlus，全部原生实现；页面加载只创建一个悬浮按钮，点击才挂载，打开不卡、点击不卡。</p></div>
       <div class="card"><h3><span class="dot"></span>自动检查更新</h3><p>更新地址使用 GitHub Pages（约 10 分钟缓存），发布新版本后很快就能收到更新提示。</p></div>
     </div>
@@ -463,6 +469,9 @@
         </tbody>
       </table>
     </div>
+    <div class="note">
+      视频与文档任务的推进过程会在「首页」日志里逐条打印：播放状态、倍速与拖拽结果、进入下一节的命中方式、卡片切换失败时的激活元素文案。排查自动播放 / 自动跳章节问题时，导出这份日志最有效。
+    </div>
   </section>
 
   <section id="domains">
@@ -545,10 +554,54 @@
     </details>
 
     <details>
+      <summary>学习通界面上没有倍速选项，脚本还会开倍速吗？</summary>
+      <div class="ans">
+        <p>会先尝试，但会验证，不会硬来。脚本优先读取播放器速度菜单的最高档；读不到就尝试 2x，不生效再降到 1.75 / 1.5 / 1.25，最后保持 1x。</p>
+        <p>1.28 起还会扫描任务点文案，一旦出现「不可倍速 / 不可拖拽 / 无法拖动进度条 / 观看时长 ≥ 90%」等限制，<strong>直接保持 1x 正常播放，且不拖进度条</strong>。</p>
+        <p>1.30 起顺序改为「先播放并确认进度真的在推进 → 再设倍速 → 再拖拽」；设速后 1.8 秒内若播放被中断，会自动回退 1x 继续播。所以没有倍速选项时可能短暂尝试，但不会一直强设倍速、更不会把视频卡住。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>视频无法自动播放 / 手动点播放后画面动一下就停</summary>
+      <div class="ans">
+        <p>多见于标注「观看时长 ≥ 90%、不可倍速、不可拖拽」的任务点：1.27 及更早版本一上来就强设 2x，播放器会把速度打回甚至暂停；同时 <code>play()</code> 在播放器尚未初始化（<code>duration</code> 都取不到）时被调用，会抛 <code>AbortError</code>。</p>
+        <p>1.28 起：<strong>等就绪 + 校验 + 重试</strong>——先等 <code>readyState ≥ 2</code>（最多 3 秒）再播；每次播放后校验 1.2 秒内 <code>currentTime</code> 是否真的推进，未推进就点播放器按钮重试（最多 4 次），不再「点一次就算成功」。恢复播放被拒绝可重试 8 次；速度被播放器改回时最多纠正 3 次即放弃，避免来回拉锯。</p>
+        <p>1.30 起：<code>applyMediaOptimizations()</code> 从 <code>play()</code> 之前移到播放确认之后；<code>video.paused</code> 为真时直接跳过拖拽，日志写明「视频尚未开始播放，暂不拖拽进度条」。1.31 起还移除了播放前的强制 <code>pause()</code>，避免与播放器状态机冲突。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>日志停在「准备播放」，一直不出现「播放成功」</summary>
+      <div class="ans">
+        <p>这是 1.28–1.30 的一个<strong>单位错误</strong>：项目里 <code>sleep(second)</code> 的参数单位是「秒」（内部 <code>× 1000</code>），而新增的重试逻辑误传了毫秒——<code>sleep(1200)</code> 实际等 20 分钟、<code>sleep(2500)</code> 等约 42 分钟，播放确认循环直接卡死，后续倍速 / 拖拽 / 下一节全部不会执行。</p>
+        <p>1.31 已改为 <code>sleep(1.2)</code> / <code>sleep(2.5)</code>，并在定义处标注单位；同时补全「播放流程已结束」「页面已切换」「任务点已完成」「检测到视频弹题」等分支日志与播放状态诊断。低于 1.31 请更新。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>视频播完 / 文档滑完，不自动进入下一个任务或章节</summary>
+      <div class="ans">
+        <p>1.28 及更早版本进入下一节只靠 5 个固定选择器、且只在顶层文档查找；新版学习通按钮结构变化后全部落空。1.29 起改为<strong>三级兜底</strong>：① 原选择器 → ② 顶层按可见文本（下一节 / 下一小节 / 下一任务 / 继续学习等）→ ③ 逐个进入同源 iframe 做同样匹配，并加可见性判断与 2.5 秒后重试。</p>
+        <p>若章节里其实是 <code>1 Case 1 / 2 Case 2 / 3 Case 3</code> 这类<strong>卡片标签</strong>（日志表现为点了「下一节」后 iframe 列表完全没变），1.34 起会在点击后比对页面签名（<code>location.href + 顶层 iframe.src</code>），<strong>没变化就改点下一个卡片标签</strong>；找不到时 2.5 秒后再走一轮兜底。</p>
+        <p>1.35 起，卡片切换失败还会输出「当前激活元素文案」诊断。如果仍然停住，请把导出的日志发来（尤其是这一行），就能按真实标签结构补上匹配规则。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>视频播完又重播一遍，再自动跳到末尾</summary>
+      <div class="ans">
+        <p>跳转到末尾可能被「观看时长 ≥ 90%」判定未完成，播放器把视频复位重播；下一轮处理又跳一次，形成「播完 → 重播 → 跳末尾」的循环。</p>
+        <p>1.32 曾默认关闭自动 seek，但按用户要求 1.33 已<strong>恢复默认开启</strong>，保留原有的极速刷完体验；同时用 <code>seekedVideoSrcs</code> 保证同一视频在本次章节内最多只跳一次。1.34 又新增 <code>completedVideoSrcs</code>：本页已自然播完的视频被复位后直接跳过，日志「该视频本页已播放完成，跳过重播」。</p>
+        <p>若某门课仍因此重播，可把脚本内 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，退回纯倍速播完。</p>
+      </div>
+    </details>
+
+    <details>
       <summary>视频不加速 / 不会自动跳到末尾</summary>
       <div class="ans">
-        <p>倍速上限由播放器开放程度决定：脚本优先读取播放器速度菜单的最高档，读不到就直接尝试 2x，仍不生效则降级到 1.75 / 1.5 / 1.25。部分课程会禁用倍速，此时脚本会保持 1x 正常播放。</p>
-        <p>脚本会把进度拖到结尾前 5 秒。若某门课要求「观看时长 ≥ 90%」，跳转可能被判未完成并导致视频复位重播（表现为「播完又从头播、再跳到末尾」）；遇到这种情况可把脚本内 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，改为纯倍速播完。同一视频在本次章节内只会跳一次。</p>
+        <p>倍速上限由播放器开放程度决定：优先读速度菜单最高档，读不到尝试 2x，仍不生效则降级到 1.75 / 1.5 / 1.25，最后保持 1x；命中课程限制文案时直接保持 1x（详见本页「学习通界面上没有倍速选项，脚本还会开倍速吗？」）。</p>
+        <p>自动跳到结尾前 5 秒在 v1.33 起<strong>默认开启</strong>（<code>ENABLE_AUTO_SEEK = true</code>），且只在「已确认视频真的在播放」之后才执行。若某门课要求「观看时长 ≥ 90%」，跳转可能被判未完成并导致复位重播；这种情况可把 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，改为纯倍速播完。同一视频在本次章节内只会跳一次。</p>
       </div>
     </details>
 
@@ -562,8 +615,16 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.27。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.35（2026-11-02）。v1.28–v1.35 集中修复视频播放与自动推进链路。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.35</span><p>卡片切换失败时输出当前激活态元素文案（最多 8 个），便于按真实标签结构补规则；仅诊断，无行为变更。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.34</span><p>修复「视频播完不进入下一个视频」：点击后校验页面签名，未变化则切换 <code>1 Case 1 / 2 Case 2</code> 章节卡片标签；新增已播完视频记录，跳过复位重播。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.33</span><p>按用户要求恢复自动拖到结尾前 5 秒（默认开启），保留「同一视频只跳一次」。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.32</span><p>曾默认关闭自动 seek 以避免播完重播；新增 <code>seekedVideoSrcs</code>，同章节内同一视频最多跳一次（v1.33 已回滚这一「默认关闭」改动、恢复默认开启）。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.31</span><p>修复 <code>sleep</code> 单位误用（毫秒当秒）导致播放确认卡死 20 分钟；补全播放诊断日志，移除播放前强制 <code>pause()</code>。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.30</span><p>改为「先确认播放成功，再设倍速 / 拖拽」；未播放时跳过 seek，设速后播放被中断自动回退 1x。</p></div>
+      <div class="tl-item"><span class="tl-ver">v1.29</span><p>修复视频 / 文档完成后不自动进入下一节：选择器 → 可见文本 → iframe 内文本三级兜底；并完成全脚本冒烟测试。</p></div>
+      <div class="tl-item key"><span class="tl-ver">v1.28</span><p>修复禁用倍速 / 拖拽课程的播放中断：识别限制文案、等播放器就绪、校验进度推进、播放失败重试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.27</span><p>更新地址改用 GitHub Pages，缓存从约 12 小时降到约 10 分钟。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.26</span><p>修复切换标签后高亮不更新（补上 class 的编译更新位）。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.25</span><p>标签按页面 URL 类型判定，不再被逻辑强行压回首页；新增页面内跳转监听。</p></div>
@@ -597,7 +658,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· v1.27 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.35 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
