@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.37
+// @version      1.38
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7314,6 +7314,12 @@
       const handleVisibleChange = (visible2) => {
         isShow.value = visible2;
       };
+      // 面板被「—」彻底收起后，AI 圆钮用这个函数重新展开（同时恢复为完整面板）。
+      registerRestorePanel(() => {
+        isShow.value = true;
+        configStore.isMinus = false;
+        hideLauncher();
+      });
       const startDrag = (event) => {
         isDragging.value = true;
         const header = event.currentTarget;
@@ -7382,7 +7388,17 @@
                 ])
               ]),
               vue.createVNode(_sfc_main$2, {
-                onToggleZoom: _cache[0] || (_cache[0] = ($event) => vue.unref(configStore).isMinus = $event)
+                onToggleZoom: _cache[0] || (_cache[0] = ($event) => {
+                  if ($event === true) {
+                    // 「—」：彻底收起面板，只留右下角 AI 圆钮；再点圆钮重新打开。
+                    vue.unref(configStore).isMinus = true;
+                    isShow.value = false;
+                    showLauncher();
+                  } else {
+                    vue.unref(configStore).isMinus = false;
+                    isShow.value = true;
+                  }
+                })
               })
             ]),
             vue.createElementVNode("div", { class: "mp-body" }, [
@@ -7451,6 +7467,18 @@
   // 轻量悬浮启动按钮（原生 DOM，绝不触碰 Vue 面板）：页面加载即创建，点击才挂载重面板。
   // 这样无论哪个 chaoxing 子域（i / v8 / v1 / manage …）打开瞬间都不会被面板挂载卡住。
   const LAUNCHER_ID = "cx-ai-launcher";
+  // 「—」彻底收起面板后，由 layout 注册一个恢复函数；AI 圆钮点击时直接调用它重新展开面板，
+  // 不再重复挂载 Vue 应用（面板 DOM 一直在 shadow root 里，只是 display:none）。
+  let restorePanelFn = null;
+  const registerRestorePanel = (fn) => { restorePanelFn = fn; };
+  const showLauncher = () => {
+    const btn = document.getElementById(LAUNCHER_ID);
+    if (btn) btn.style.removeProperty("display");
+  };
+  const hideLauncher = () => {
+    const btn = document.getElementById(LAUNCHER_ID);
+    if (btn) btn.style.display = "none";
+  };
   let panelMounted = false;
   const mountPanelOnce = () => {
     if (window.top !== window.self)
@@ -7462,9 +7490,7 @@
     defer(() => {
       try {
         mountApp();
-        const btn = document.getElementById(LAUNCHER_ID);
-        if (btn)
-          btn.style.display = "none";
+        hideLauncher();
       } catch (e) {
         console.error("[学习通AI助手] 面板挂载失败：", e);
         panelMounted = false;
@@ -7508,7 +7534,14 @@
       "box-shadow:0 2px 8px rgba(0,0,0,.25)",
       "user-select:none"
     ].join(";");
-    btn.addEventListener("click", mountPanelOnce);
+    btn.addEventListener("click", () => {
+      // 面板已挂载但被「—」收起时，直接恢复显示；否则才首次挂载。
+      if (panelMounted && restorePanelFn) {
+        restorePanelFn();
+        return;
+      }
+      mountPanelOnce();
+    });
     document.body.appendChild(btn);
   };
   const bootstrapLauncher = setInterval(() => {
