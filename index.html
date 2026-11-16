@@ -275,7 +275,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.38</span>
+      <span class="badge solid">v1.39</span>
       <span class="badge">用户脚本 / Userscript</span>
       <span class="badge">最近更新 2026-11-16</span>
       <span class="badge">MIT License</span>
@@ -440,7 +440,7 @@
       </table>
     </div>
     <div class="note">
-      面板标题栏右侧的「—」是<strong>彻底收起</strong>：点一下整个面板消失，只留右下角蓝色「AI」圆钮；再点圆钮即可重新展开面板。旁边的「⛶」用于把最小化状态展开回来。
+      面板标题栏右侧的「—」是<strong>两步收起</strong>：点一下先变成「已最小化，点击上方按钮恢复」小卡片；在小卡片上再点一下「—」，面板才会彻底消失、只留右下角蓝色「AI」圆钮；点圆钮重新展开完整面板。旁边的「⛶」可从最小化状态直接展开回来。
     </div>
 
     <h3 style="margin:26px 0 6px;font-size:16px;">标签与页面的联动规则</h3>
@@ -626,8 +626,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.38（2026-11-16）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.39（2026-11-16）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.39</span><p>「—」改回两步收起：先变小卡片，再点一次才彻底收起成 AI 圆钮；补齐全流程冒烟测试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.38</span><p>面板「—」改为彻底收起（只留 AI 圆钮），点圆钮重新展开；新增该交互的冒烟测试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.37</span><p>按用户要求移除 <code>*.edu.cn</code> 生效域名，脚本不再在该域名下注入。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.36</span><p>DeepSeek 模型改为官方在售的 <code>deepseek-flash</code> / <code>deepseek-v4-pro</code>，预设地址改为 <code>https://api.deepseek.com</code>；修复预设清空模型后把 <code>gpt-4o-mini</code> 发给 DeepSeek 的兜底错误。</p></div>
@@ -672,7 +673,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.38 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.39 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">

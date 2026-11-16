@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.38
+// @version      1.39
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -7390,11 +7390,15 @@
               vue.createVNode(_sfc_main$2, {
                 onToggleZoom: _cache[0] || (_cache[0] = ($event) => {
                   if ($event === true) {
-                    // 「—」：彻底收起面板，只留右下角 AI 圆钮；再点圆钮重新打开。
-                    vue.unref(configStore).isMinus = true;
-                    isShow.value = false;
-                    showLauncher();
+                    // 「—」两步：第一次变成「已最小化」小卡片；在小卡片上再点一次才彻底收起、只留 AI 圆钮。
+                    if (vue.unref(configStore).isMinus) {
+                      isShow.value = false;
+                      showLauncher();
+                    } else {
+                      vue.unref(configStore).isMinus = true;
+                    }
                   } else {
+                    // 「⛶」：从最小化状态展开回完整面板。
                     vue.unref(configStore).isMinus = false;
                     isShow.value = true;
                   }
