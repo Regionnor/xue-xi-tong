@@ -275,7 +275,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.42</span>
+      <span class="badge solid">v1.43</span>
       <span class="badge">用户脚本 / Userscript</span>
       <span class="badge">最近更新 2026-11-22</span>
       <span class="badge">MIT License</span>
@@ -639,8 +639,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.42（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退，v1.41 把视频跳结尾改为设置页开关，v1.42 同步倍速菜单高亮。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.43（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退，v1.41 把视频跳结尾改为设置页开关，v1.42 同步倍速菜单高亮，v1.43 移除遗留的反特性声明。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.43</span><p>移除头部从原版继承的 <code>@antifeature ads / payment</code>（公众号 / App 辅助答题、付费答题）残留声明——改良版并无这些功能；补充无广告 / 无付费的真实声明，避免脚本站误标。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.42</span><p>设速后同步点击播放器倍速菜单，解决「日志显示已设 2x、菜单仍高亮 1x」的显示不一致；找不到菜单项时回退并在日志说明。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.41</span><p>「视频自动跳到结尾」改为「设置 → 章节设置」里的可切换开关（默认开启、即时生效并持久化），不再需要改脚本常量。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.40</span><p>修复填好 DeepSeek 后重进「答题」页预设下拉框错误显示为 OpenAI：改为按已保存的接口地址反推预设，切标签 / 重开面板 / 刷新后都跟随实际配置。</p></div>
@@ -673,6 +674,9 @@
 
   <section id="disclaimer">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3z"/><path d="M12 8v4M12 16h.01"/></svg></span>免责声明</h2>
+    <div class="note" style="margin-bottom:12px;">
+      <p style="margin:0;">本改良版<strong>不含任何广告、付费、公众号 / App 辅助答题</strong>：答题完全由你自己的 AI 接口完成，脚本不接入、不引导、也不依赖任何第三方题库或答题服务。原版 ScriptCat #711 曾带有的相关特性已全部移除，头部声明也同步更正。</p>
+    </div>
     <div class="note warn">
       <p style="margin:0 0 6px;">本脚本仅供<strong>个人学习辅助</strong>与编程练习使用。</p>
       <p style="margin:0 0 6px;">请务必遵守所在平台的使用条款，以及学校 / 机构的考试纪律与诚信要求。</p>
@@ -689,7 +693,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.42 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.43 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
