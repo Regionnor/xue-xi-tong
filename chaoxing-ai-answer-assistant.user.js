@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.40
+// @version      1.41
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -306,6 +306,8 @@
     return isCurrent() && parsed.inputs.every((input) => input.checked === selected.has(input));
   };
   const VIDEO_QUIZ_SETTING = "视频弹题自动处理";
+  // 设置页开关：是否允许把视频拖到结尾前几秒快速完成（默认开启，可在「章节设置」关闭）。
+  const VIDEO_AUTO_SEEK_SETTING = "视频自动跳到结尾";
   const OPTION_INPUTS = VIDEO_QUIZ_INPUTS;
   const visible = (element) => {
     if (!element.isConnected || !element.getClientRects().length)
@@ -681,6 +683,11 @@
                   },
                   {
                     name: VIDEO_QUIZ_SETTING,
+                    value: true,
+                    type: "boolean"
+                  },
+                  {
+                    name: VIDEO_AUTO_SEEK_SETTING,
                     value: true,
                     type: "boolean"
                   }
@@ -6056,10 +6063,14 @@
     const HOME_TAB_NAME = "0";
     const ANSWER_TAB_NAME2 = "1";
     const PDF_COMPLETION_WAIT_SECONDS = 5;
-    // 是否允许「自动拖到结尾前 5 秒」快速刷完。默认开启。
-    // 注意：超星部分任务点要求「观看时长 ≥ 90%」，跳进度可能被判未完成并复位重播；
-    // 若遇到这种情况，可把这里改成 false，改为只按倍速正常播完。
-    const ENABLE_AUTO_SEEK = true;
+    // 是否允许「自动拖到结尾前 5 秒」快速刷完：改为设置页开关「视频自动跳到结尾」。
+    // 部分任务点要求「观看时长 ≥ 90%」，跳进度可能被判未完成并复位重播，
+    // 遇到这种情况可在「设置 → 章节设置」关闭本项。每次播放都重新读取，切换后即时生效。
+    const isAutoSeekEnabled = () => {
+      const params = configStore.platformParams.cx.parts[0].params;
+      const setting = params.find((p) => p.name === VIDEO_AUTO_SEEK_SETTING);
+      return setting ? setting.value !== false : true;
+    };
     let runningIframeDocumentTasks = /* @__PURE__ */ new WeakMap();
     let processedIframeDocuments = /* @__PURE__ */ new WeakSet();
     // 记录「已经拖拽过 / 已确认拖拽无效」的视频 src：同一个视频只跳一次，避免播完又跳、跳完又播的循环
@@ -6613,8 +6624,8 @@
               logStore.addLog(`[诊断] 视频尚未开始播放，暂不拖拽进度条`, "primary");
               return;
             }
-            if (!ENABLE_AUTO_SEEK) {
-              logStore.addLog(`[诊断] 已关闭自动拖拽（避免播完重播），按当前倍速正常播完`, "primary");
+            if (!isAutoSeekEnabled()) {
+              logStore.addLog(`[诊断] 已在设置中关闭「视频自动跳到结尾」，按当前倍速正常播完`, "primary");
               return;
             }
             const seekSrcKey = video.currentSrc || video.src || "";

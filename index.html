@@ -275,7 +275,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.40</span>
+      <span class="badge solid">v1.41</span>
       <span class="badge">用户脚本 / Userscript</span>
       <span class="badge">最近更新 2026-11-22</span>
       <span class="badge">MIT License</span>
@@ -333,7 +333,7 @@
       <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。下拉框跟随已保存的接口地址，切标签 / 重开面板 / 刷新后仍显示你实际在用的服务商，不会回退到 OpenAI。</p></div>
       <div class="card"><h3><span class="dot"></span>视频自动播放与顺序保障</h3><p>等播放器就绪（<code>readyState ≥ 2</code>）再播放，并校验进度确实在推进；<strong>确认播起来之后</strong>才设倍速、才尝试拖拽。设速后若播放被中断会自动回退 1x，避免「画面动一下就停」。</p></div>
       <div class="card"><h3><span class="dot"></span>文档 / PPT 自动阅读</h3><p>递归进入嵌套 iframe，滑动到真正的内容渲染层，自动完成文档、PDF 的阅读任务点。</p></div>
-      <div class="card"><h3><span class="dot"></span>视频智能加速与限制识别</h3><p>自动选取播放器允许的最高倍速（默认 2x），并可拖到结尾前几秒快速完成。任务点若标注「不可倍速 / 不可拖拽 / 观看时长 ≥ 90%」，自动保持 1x 且不拖进度；同一视频只跳一次，已播完的不再重播。</p></div>
+      <div class="card"><h3><span class="dot"></span>视频智能加速与限制识别</h3><p>自动选取播放器允许的最高倍速（默认 2x），并可拖到结尾前几秒快速完成；<strong>「设置 → 章节设置」里可随时开关「视频自动跳到结尾」</strong>（默认开启、即时生效并保存）。任务点若标注「不可倍速 / 不可拖拽 / 观看时长 ≥ 90%」，自动保持 1x 且不拖进度；同一视频只跳一次，已播完的不再重播。</p></div>
       <div class="card"><h3><span class="dot"></span>自动推进到下一任务</h3><p>视频播完 / 文档滑完后，按「固定选择器 → 页面可见文本 → iframe 内文本 → 章节卡片标签」逐级兜底进入下一节；点完会校验页面是否真的变了，没变就换下一种方式重试。</p></div>
       <div class="card"><h3><span class="dot"></span>覆盖主要场景</h3><p>视频任务点、章节测试、作业、考试均可自动完成；支持自动提交与正确率阈值策略。</p></div>
       <div class="card"><h3><span class="dot"></span>运行日志与诊断导出</h3><p>「首页」实时显示运行日志（播放状态、倍速 / 拖拽结果、进入下一节的命中方式、卡片切换诊断等），可一键导出为 <code>.txt</code>，排查问题直接发日志即可。</p></div>
@@ -461,10 +461,11 @@
       <table>
         <thead><tr><th>分组</th><th>设置项</th><th>含义</th></tr></thead>
         <tbody>
-          <tr><td rowspan="4">章节设置</td><td>章节作业自动提交</td><td>章节内的作业自动提交。</td></tr>
+          <tr><td rowspan="5">章节设置</td><td>章节作业自动提交</td><td>章节内的作业自动提交。</td></tr>
           <tr><td>是否自动下一章节</td><td>当前章节任务点完成后自动进入下一章。</td></tr>
           <tr><td>只答题，不做其他</td><td>只做答题相关，跳过 PPT / 文档 / 音视频的自动阅读。</td></tr>
           <tr><td>视频弹题自动处理</td><td>视频播放中弹出的题目自动作答。</td></tr>
+          <tr><td>视频自动跳到结尾</td><td>是否把视频拖到结尾前 5 秒快速完成（默认开启）；若课程要求观看时长 ≥ 90% 导致重播，可取消勾选改为按倍速正常播完。</td></tr>
           <tr><td>考试设置</td><td>是否自动切换</td><td>考试中是否自动切换到下一题。</td></tr>
           <tr><td rowspan="3">其他参数</td><td>切换、答题间隔，单位秒</td><td>题目之间、任务切换之间的等待秒数。</td></tr>
           <tr><td>正确率达到多少自动提交</td><td>作答正确率达到该值时自动提交。</td></tr>
@@ -612,7 +613,7 @@
       <div class="ans">
         <p>跳转到末尾可能被「观看时长 ≥ 90%」判定未完成，播放器把视频复位重播；下一轮处理又跳一次，形成「播完 → 重播 → 跳末尾」的循环。</p>
         <p>1.32 曾默认关闭自动 seek，但按用户要求 1.33 已<strong>恢复默认开启</strong>，保留原有的极速刷完体验；同时用 <code>seekedVideoSrcs</code> 保证同一视频在本次章节内最多只跳一次。1.34 又新增 <code>completedVideoSrcs</code>：本页已自然播完的视频被复位后直接跳过，日志「该视频本页已播放完成，跳过重播」。</p>
-        <p>若某门课仍因此重播，可把脚本内 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，退回纯倍速播完。</p>
+        <p>若某门课仍因此重播，v1.41 起只需在「<strong>设置 → 章节设置</strong>」<strong>取消勾选「视频自动跳到结尾」</strong>即可退回纯倍速播完，不必再改脚本代码；切换即时生效，设置会被保存。</p>
       </div>
     </details>
 
@@ -620,7 +621,7 @@
       <summary>视频不加速 / 不会自动跳到末尾</summary>
       <div class="ans">
         <p>倍速上限由播放器开放程度决定：优先读速度菜单最高档，读不到尝试 2x，仍不生效则降级到 1.75 / 1.5 / 1.25，最后保持 1x；命中课程限制文案时直接保持 1x（详见本页「学习通界面上没有倍速选项，脚本还会开倍速吗？」）。</p>
-        <p>自动跳到结尾前 5 秒在 v1.33 起<strong>默认开启</strong>（<code>ENABLE_AUTO_SEEK = true</code>），且只在「已确认视频真的在播放」之后才执行。若某门课要求「观看时长 ≥ 90%」，跳转可能被判未完成并导致复位重播；这种情况可把 <code>ENABLE_AUTO_SEEK</code> 改为 <code>false</code>，改为纯倍速播完。同一视频在本次章节内只会跳一次。</p>
+        <p>自动跳到结尾前 5 秒在 v1.33 起默认开启，且只在「已确认视频真的在播放」之后才执行。<strong>v1.41 起可在「设置 → 章节设置 → 视频自动跳到结尾」自由勾选或取消</strong>（默认开启、即时生效并保存）：若某门课要求「观看时长 ≥ 90%」导致跳转后复位重播，取消勾选即可改为纯倍速播完。同一视频在本次章节内只会跳一次。</p>
       </div>
     </details>
 
@@ -634,8 +635,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.40（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.41（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退，v1.41 把视频跳结尾改为设置页开关。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.41</span><p>「视频自动跳到结尾」改为「设置 → 章节设置」里的可切换开关（默认开启、即时生效并持久化），不再需要改脚本常量。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.40</span><p>修复填好 DeepSeek 后重进「答题」页预设下拉框错误显示为 OpenAI：改为按已保存的接口地址反推预设，切标签 / 重开面板 / 刷新后都跟随实际配置。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.39</span><p>「—」改回两步收起：先变小卡片，再点一次才彻底收起成 AI 圆钮；补齐全流程冒烟测试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.38</span><p>面板「—」改为彻底收起（只留 AI 圆钮），点圆钮重新展开；新增该交互的冒烟测试。</p></div>
@@ -682,7 +684,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.40 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.41 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
