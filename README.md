@@ -6,7 +6,7 @@
 
 > 在线说明文档：<https://regionnor.github.io/xue-xi-tong/>
 >
-> 当前版本：**v1.41**（2026-11-22），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
+> 当前版本：**v1.42**（2026-11-22），完整变更见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ---
 

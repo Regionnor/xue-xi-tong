@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.41
+// @version      1.42
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -6518,30 +6518,64 @@
             } catch (e2) {
             }
             let chosen = null;
+            let menuRateItems = [];
+            const rateFromLabel = (text) => {
+              const m = (text || "").match(/(\d+(?:\.\d+)?)\s*x/i);
+              return m ? parseFloat(m[1]) : 0;
+            };
             const detectMenuMax = () => {
+              menuRateItems = [];
               try {
                 const docs = [iframeDocument, document];
                 for (const d of docs) {
                   if (!d || !d.querySelectorAll)
                     continue;
-                  const nodes = d.querySelectorAll("[class*='playback-rate'], [class*='speed'], .speedMenu, .speed-box");
-                  for (const n of nodes) {
-                    const items = n.querySelectorAll("li, [data-rate], [data-speed], .vjs-menu-item");
-                    for (const it of items) {
-                      const label = (it.textContent || "").trim();
-                      const attr = it.getAttribute("data-rate") || it.getAttribute("data-speed") || "";
-                      const m = label.match(/(\d+(?:\.\d+)?)\s*x/i) || attr.match(/(\d+(?:\.\d+)?)/);
-                      if (m) {
-                        const r = parseFloat(m[1]);
-                        if (r > 0 && r <= 16 && (chosen == null || r > chosen))
-                          chosen = r;
-                      }
+                  const seen = new Set();
+                  const collect = (el) => {
+                    if (!el || seen.has(el))
+                      return;
+                    seen.add(el);
+                    const label = (el.textContent || "").trim();
+                    const attr = el.getAttribute("data-rate") || el.getAttribute("data-speed") || "";
+                    const r = rateFromLabel(label) || parseFloat(attr);
+                    if (r > 0 && r <= 16) {
+                      menuRateItems.push({ el, rate: r });
+                      if (chosen == null || r > chosen)
+                        chosen = r;
                     }
+                  };
+                  const nodes = d.querySelectorAll("[class*='playback-rate'], [class*='speed'], [class*='rate-menu'], [class*='rate-list'], .speedMenu, .speed-box, .vjs-menu-content");
+                  for (const n of nodes) {
+                    const items = n.querySelectorAll("li, [data-rate], [data-speed], [class*='item'], .vjs-menu-item");
+                    for (const it of items)
+                      collect(it);
                   }
+                  for (const it of d.querySelectorAll("[data-rate], [data-speed]"))
+                    collect(it);
                 }
               } catch (e2) {
               }
               return chosen;
+            };
+            // v1.42：点击播放器自己的倍速菜单项，让菜单高亮与实际速率同步。
+            // 直接写 video.playbackRate 只会改变 DOM 属性，播放器菜单由它自己的状态驱动，不会跟着变，
+            // 表现为日志显示已设 2x、菜单却仍高亮 1x。优先点当前视频所在文档里的菜单项，避免误伤同页其他播放器。
+            const clickMenuRate = (rate) => {
+              if (!(rate > 1) || !menuRateItems.length)
+                return false;
+              const matches = menuRateItems.filter((x) => Math.abs(x.rate - rate) < 0.01);
+              if (!matches.length)
+                return false;
+              const sameDoc = matches.filter((x) => x.el.ownerDocument === video.ownerDocument);
+              const candidates = sameDoc.length ? sameDoc : matches;
+              for (const item of candidates) {
+                try {
+                  item.el.click();
+                  return true;
+                } catch (e2) {
+                }
+              }
+              return false;
             };
             detectMenuMax();
             if (chosen == null) {
@@ -6565,7 +6599,11 @@
               video.playbackRate = chosen;
             } catch (e2) {
             }
-            logStore.addLog(`已设置倍速：${chosen}x（取播放器可选上限，避免超出导致播放失败）`, "primary");
+            const menuSynced = clickMenuRate(chosen);
+            if (menuSynced)
+              logStore.addLog(`已设置倍速：${chosen}x（已点击播放器倍速菜单同步高亮；若菜单仍显示旧值，请以 rate 诊断为准，实际速率已生效）`, "primary");
+            else
+              logStore.addLog(`已设置倍速：${chosen}x（直接写入播放器，未找到可点击的菜单项；菜单高亮可能仍显示旧值，不影响实际播放）`, "primary");
             if (chosen > 1) {
               // 有些播放器不接受非 1x，设速后会直接暂停；发现被暂停就回退 1x 并继续播，避免「动一下就停」
               setTimeout(() => {
@@ -6612,7 +6650,8 @@
                   video.playbackRate = chosen;
                 } catch (e2) {
                 }
-                logStore.addLog(`播放器速度菜单已就绪，倍速上调至 ${chosen}x`, "primary");
+                const synced = clickMenuRate(chosen);
+                logStore.addLog(`播放器速度菜单已就绪，倍速上调至 ${chosen}x${synced ? "（已同步菜单高亮）" : ""}`, "primary");
               }
             }, 2500);
           } catch (e2) {

@@ -275,7 +275,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.41</span>
+      <span class="badge solid">v1.42</span>
       <span class="badge">用户脚本 / Userscript</span>
       <span class="badge">最近更新 2026-11-22</span>
       <span class="badge">MIT License</span>
@@ -618,6 +618,14 @@
     </details>
 
     <details>
+      <summary>日志说「已设置倍速 2x」，但播放器菜单还显示 1x</summary>
+      <div class="ans">
+        <p>脚本通过写入 <code>video.playbackRate</code> 改变实际播放速率，日志里的 <code>rate=2</code> 是<strong>从视频元素真实读回的值</strong>，代表加速已经生效；但播放器的倍速菜单高亮由播放器自己的内部状态控制，不会随 DOM 属性变化，所以会出现「日志已设 2x、菜单仍高亮 1x」。</p>
+        <p>v1.42 起在设速后会额外<strong>点击播放器倍速菜单里对应档位</strong>，让菜单高亮同步到实际速率（优先点击当前视频所在 iframe，避免影响同页其他播放器）。若播放器结构特殊、找不到可点击的菜单项，脚本会回退为直接写入，并在日志注明「菜单高亮可能仍显示旧值，不影响实际播放」——这种情况下<strong>以日志的 rate 诊断为准</strong>，视频实际仍在加速。</p>
+      </div>
+    </details>
+
+    <details>
       <summary>视频不加速 / 不会自动跳到末尾</summary>
       <div class="ans">
         <p>倍速上限由播放器开放程度决定：优先读速度菜单最高档，读不到尝试 2x，仍不生效则降级到 1.75 / 1.5 / 1.25，最后保持 1x；命中课程限制文案时直接保持 1x（详见本页「学习通界面上没有倍速选项，脚本还会开倍速吗？」）。</p>
@@ -635,8 +643,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.41（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退，v1.41 把视频跳结尾改为设置页开关。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.42（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退，v1.41 把视频跳结尾改为设置页开关，v1.42 同步倍速菜单高亮。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.42</span><p>设速后同步点击播放器倍速菜单，解决「日志显示已设 2x、菜单仍高亮 1x」的显示不一致；找不到菜单项时回退并在日志说明。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.41</span><p>「视频自动跳到结尾」改为「设置 → 章节设置」里的可切换开关（默认开启、即时生效并持久化），不再需要改脚本常量。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.40</span><p>修复填好 DeepSeek 后重进「答题」页预设下拉框错误显示为 OpenAI：改为按已保存的接口地址反推预设，切标签 / 重开面板 / 刷新后都跟随实际配置。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.39</span><p>「—」改回两步收起：先变小卡片，再点一次才彻底收起成 AI 圆钮；补齐全流程冒烟测试。</p></div>
@@ -684,7 +693,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.41 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.42 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">
