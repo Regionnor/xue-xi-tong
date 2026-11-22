@@ -275,9 +275,9 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="badges">
-      <span class="badge solid">v1.39</span>
+      <span class="badge solid">v1.40</span>
       <span class="badge">用户脚本 / Userscript</span>
-      <span class="badge">最近更新 2026-11-16</span>
+      <span class="badge">最近更新 2026-11-22</span>
       <span class="badge">MIT License</span>
       <span class="badge">仅超星学习通</span>
     </div>
@@ -330,7 +330,7 @@
     <div class="grid">
       <div class="card"><h3><span class="dot"></span>AI 自动答题</h3><p>对接任意 OpenAI 兼容接口（OpenAI、DeepSeek、通义千问、豆包、Kimi、小米 MiMo、本地 Ollama 等），把题干与选项发给你的 AI，解析回复后自动填入。</p></div>
       <div class="card"><h3><span class="dot"></span>全题型支持</h3><p>单选、多选、判断、填空、简答均可处理，不依赖任何题库与题库密钥。</p></div>
-      <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。</p></div>
+      <div class="card"><h3><span class="dot"></span>预设接口源 + 一键测试</h3><p>「答题」页内置预设下拉，选中即填好接口地址；点「测试连接」用极简 ping 请求验证地址 / 密钥 / 模型是否可用，并显示失败原因。下拉框跟随已保存的接口地址，切标签 / 重开面板 / 刷新后仍显示你实际在用的服务商，不会回退到 OpenAI。</p></div>
       <div class="card"><h3><span class="dot"></span>视频自动播放与顺序保障</h3><p>等播放器就绪（<code>readyState ≥ 2</code>）再播放，并校验进度确实在推进；<strong>确认播起来之后</strong>才设倍速、才尝试拖拽。设速后若播放被中断会自动回退 1x，避免「画面动一下就停」。</p></div>
       <div class="card"><h3><span class="dot"></span>文档 / PPT 自动阅读</h3><p>递归进入嵌套 iframe，滑动到真正的内容渲染层，自动完成文档、PDF 的阅读任务点。</p></div>
       <div class="card"><h3><span class="dot"></span>视频智能加速与限制识别</h3><p>自动选取播放器允许的最高倍速（默认 2x），并可拖到结尾前几秒快速完成。任务点若标注「不可倍速 / 不可拖拽 / 观看时长 ≥ 90%」，自动保持 1x 且不拖进度；同一视频只跳一次，已播完的不再重播。</p></div>
@@ -421,7 +421,7 @@
         </tbody>
       </table>
     </div>
-    <div class="note">预设只填「接口地址」，模型名需按你所使用的服务自行填写；本地 Ollama 可用 <code>http://localhost:11434/v1</code>，模型填 <code>qwen2.5</code> 之类。v1.36 起模型留空时会按地址兜底：DeepSeek 用 <code>deepseek-flash</code>，其余用 <code>gpt-4o-mini</code>；仍建议显式填写模型名。</div>
+    <div class="note">预设只填「接口地址」，模型名需按你所使用的服务自行填写；本地 Ollama 可用 <code>http://localhost:11434/v1</code>，模型填 <code>qwen2.5</code> 之类。v1.36 起模型留空时会按地址兜底：DeepSeek 用 <code>deepseek-flash</code>，其余用 <code>gpt-4o-mini</code>；仍建议显式填写模型名。<br>预设下拉<strong>跟随已保存的接口地址</strong>（v1.40 修复）：切换标签 / 重开面板 / 刷新页面后仍显示你正在用的服务商，不会变成 OpenAI；手填的地址若不匹配任何预设，会显示为「空白（自定义）」。</div>
   </section>
 
   <section id="usage">
@@ -552,6 +552,14 @@
     </details>
 
     <details>
+      <summary>填好的 DeepSeek 预设，再点进去怎么变成 OpenAI 了？</summary>
+      <div class="ans">
+        <p>这是 v1.39 及以前的下拉框显示 bug：<strong>地址、密钥、模型其实都还在</strong>，只有「预设」那一栏被错误重置成了 OpenAI。因为「答题」页是动态组件，切标签或重开面板时会重建，而当时下拉框状态写死为 <code>openai</code>。</p>
+        <p>v1.40 起下拉框改为<strong>按已保存的接口地址反推</strong>，切标签 / 重开面板 / 刷新页面后都会正确显示 DeepSeek（或其他你实际在用的服务商）。手填的地址如果不匹配任何预设，会显示「空白（自定义）」，这是正常的——真正发给接口的是「地址」框里的值，不受下拉框显示影响。</p>
+      </div>
+    </details>
+
+    <details>
       <summary>「测试连接」失败：请求出错 / 超时 / 返回异常</summary>
       <div class="ans">
         <ul>
@@ -626,8 +634,9 @@
 
   <section id="changelog">
     <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>版本里程碑</h2>
-    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.39（2026-11-16）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址。</p>
+    <p class="sub">完整记录见仓库 <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a>；当前版本 v1.40（2026-11-22）。v1.28–v1.35 集中修复视频播放与自动推进链路，v1.36 同步 DeepSeek 最新模型与接口地址，v1.40 修复预设下拉框回退。</p>
     <div class="timeline">
+      <div class="tl-item key"><span class="tl-ver">v1.40</span><p>修复填好 DeepSeek 后重进「答题」页预设下拉框错误显示为 OpenAI：改为按已保存的接口地址反推预设，切标签 / 重开面板 / 刷新后都跟随实际配置。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.39</span><p>「—」改回两步收起：先变小卡片，再点一次才彻底收起成 AI 圆钮；补齐全流程冒烟测试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.38</span><p>面板「—」改为彻底收起（只留 AI 圆钮），点圆钮重新展开；新增该交互的冒烟测试。</p></div>
       <div class="tl-item key"><span class="tl-ver">v1.37</span><p>按用户要求移除 <code>*.edu.cn</code> 生效域名，脚本不再在该域名下注入。</p></div>
@@ -673,7 +682,7 @@
     <a href="https://github.com/Regionnor/xue-xi-tong/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
     <a href="https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js">安装 / 更新地址</a>
   </div>
-  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.39 · 文档更新 2026-11-16 · MIT License · 基于 ScriptCat #711 改良</div>
+  <div>学习通AI答题小助手（Region改良款）· 当前版本 v1.40 · 文档更新 2026-11-22 · MIT License · 基于 ScriptCat #711 改良</div>
 </footer>
 
 <button class="top" id="topBtn" title="回到顶部" aria-label="回到顶部">

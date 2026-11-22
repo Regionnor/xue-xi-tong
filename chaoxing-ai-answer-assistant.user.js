@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通AI答题小助手--Region改良款
 // @namespace    https://github.com/Region
-// @version      1.39
+// @version      1.40
 // @downloadURL  https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @updateURL    https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js
 // @author       Region
@@ -1157,9 +1157,16 @@
         { label: "小米 MiMo", value: "mimo", baseUrl: "https://api.xiaomimimo.com/v1", model: "" },
         { label: "空白（自定义）", value: "custom", baseUrl: "", model: "" }
       ];
-      const currentPreset = vue.ref("openai");
+      // 下拉框状态跟随已保存的接口地址：地址/密钥/模型是持久化的，而下拉框原来写死
+      // ref("openai")，重开面板或切回「答题」标签时组件重建就会错误显示 OpenAI。
+      // 按地址反推预设，既是唯一真实来源，也避免多存一个会不同步的字段。
+      const presetByBaseUrl = (url) => {
+        const normalized = (url || "").trim().replace(/\/+$/, "").toLowerCase();
+        const hit = aiPresets.find((p) => (p.baseUrl || "").trim().replace(/\/+$/, "").toLowerCase() === normalized);
+        return hit ? hit.value : "custom";
+      };
+      const currentPreset = vue.computed(() => presetByBaseUrl(configStore.aiConfig.baseUrl));
       const applyPreset = (val) => {
-        currentPreset.value = val;
         const p = aiPresets.find((x) => x.value === val);
         if (p) {
           configStore.aiConfig.baseUrl = p.baseUrl;
@@ -1251,7 +1258,7 @@
             (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(aiPresets, function (p) {
               return vue.openBlock(), vue.createVNode("option", { key: p.value, value: p.value }, vue.toDisplayString(p.label), 9, ["value"]);
             }), 256))
-          ]),
+          ], 8, ["value", "onChange"]),
           vue.createElementVNode("div", { class: "mp-field" }, [
             vue.createElementVNode("span", { class: "mp-label" }, "地址"),
             vue.createElementVNode("input", {
