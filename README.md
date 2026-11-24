@@ -36,7 +36,7 @@
    - [Tampermonkey](https://www.tampermonkey.net/)
    - [ScriptCat](https://scriptcat.org/)
    - 暴力猴（Violentmonkey）等支持 `@require` / `@connect` 的管理器
-2. 打开 <https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js>，管理器会自动弹出安装页；也可将本仓库的 `chaoxing-ai-answer-assistant.user.js` 文件拖入管理器，或复制其内容新建脚本保存。
+2. 打开 <https://regionnor.github.io/xue-xi-tong/chaoxing-ai-answer-assistant.user.js>，管理器会自动弹出安装页；也可从 [ScriptCat 分流页（#8168）](https://scriptcat.org/zh-CN/script-show-page/8168)安装，或将本仓库的 `chaoxing-ai-answer-assistant.user.js` 文件拖入管理器、复制其内容新建脚本保存。无论从哪个入口安装，自动更新都走上面的 GitHub Pages 地址。
 3. 确认脚本已启用。
 
 ---
